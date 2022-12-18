@@ -1,0 +1,12 @@
+#
+#  Ignore working directories
+incremental_db/
+db/
+output_files/
+#
+#  Except for the .ttf output file
+!output_files/*.ttf
+#
+#  Ignore backup files
+*.bak
+#
