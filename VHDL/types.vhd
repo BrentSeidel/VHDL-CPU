@@ -39,7 +39,7 @@ package typedefs is
   constant ALU_OP_TST  : integer := 7;
   constant ALU_OP_NEG  : integer := 8;
   constant ALU_OP_ADC  : integer := 9;  --  Add with carry
-  constant ALU_OP_SBC  : integer := 10; --  Subtract with carry
+  constant ALU_OP_SBC  : integer := 10; --  Subtract with carry/borrow
 end package;
 
 package body typedefs is

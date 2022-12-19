@@ -3,6 +3,7 @@
 incremental_db/
 db/
 output_files/
+simulation/
 #
 #  Except for the .ttf output file
 !output_files/*.ttf

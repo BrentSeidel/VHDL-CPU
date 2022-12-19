@@ -114,7 +114,7 @@ begin
 	     data <= (others => 'Z');
 		end if;
 	 else
-      data <= (others => 'Z');
+	   data <= (others => 'Z');
     end if;
   end process flag_reg;
   --

@@ -2,7 +2,7 @@
 //  Based on the program available here: https://content.arduino.cc/assets/SketchVidorFPGA.zip
 //  defines.h, jtag.c, and jtag.h are from that archive.  app.h is generated from the .ttf file
 //  using the vidorcvt program.  I have modified sketch.ino for this demo.
-// 
+//
 #include <wiring_private.h>
 #include "jtag.h"
 #include "defines.h"
@@ -56,10 +56,17 @@ const int results[] =
  32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
  48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 //
+//  Global counters for test pass and fail
+int tests  = 0;
+int passes = 0;
+int fails  = 0;
+//
 //  Define some functions.
 void set_addr(int addr);
 void write_data(int data);
 int read_data();
+void write_addr(int addr, int data);
+int read_addr(int addr);
 void test_reg(int addr, int expected);
 void test_alu(int op1, int op2, int func, int expected,
   const char *name, int flg);
@@ -104,8 +111,7 @@ void loop()
   Serial.println("Writing values.");
   for (x = 0; x < REG_NUM; x++)
   {
-    set_addr(x);
-    write_data(x + 10);
+    write_addr(x, x + 10);
     Serial.print("Wrote ");
     Serial.print(x + 10);
     Serial.print(" to register ");
@@ -117,28 +123,51 @@ void loop()
     test_reg(x, results[x]);
   }
   Serial.println("Testing ALU.");
+  write_addr(ALU_FLAGS, 0);
+  x = read_addr(ALU_FLAGS);
   test_alu(31, 20, ALU_OP_ADD, 51, "31 ADD 20", 0);
   test_alu(21, 40, ALU_OP_ADD, 61, "21 ADD 40", 0);
+  //
   test_alu(31, 20, ALU_OP_SUB, 11, "31 SUB 20", 0);
   test_alu(20, 31, ALU_OP_SUB, 245, "20 SUB 31", ALU_FLAG_SIGN +
                                                  ALU_FLAG_CARRY);
+  //
   test_alu(127, 0, ALU_OP_NOT, 128, "127 NOT", ALU_FLAG_SIGN);
   test_alu(1, 123, ALU_OP_NOT, 254, "1 NOT", ALU_FLAG_SIGN);
+  //
   test_alu(15, 13, ALU_OP_AND, 13, "15 AND 13", 0);
   test_alu(16, 15, ALU_OP_AND, 0, "16 AND 15", ALU_FLAG_ZERO);
+  //
   test_alu(16, 15, ALU_OP_OR, 31, "16 OR 15", 0);
   test_alu(15, 13, ALU_OP_OR, 15, "15 OR 13", 0);
+  //
   test_alu(5, 15, ALU_OP_XOR, 10, "5 XOR 15", 0);
   test_alu(255, 254, ALU_OP_XOR, 1, "255 XOR 254", 0);
   test_alu(123, 123, ALU_OP_XOR, 0, "123 XOR 123", ALU_FLAG_ZERO);
+  //
   test_alu(255, 0, ALU_OP_TST, 255, "255 TST", ALU_FLAG_SIGN);
   test_alu(128, 0, ALU_OP_TST, 128, "128 TST", ALU_FLAG_SIGN);
   test_alu(127, 0, ALU_OP_TST, 127, "127 TST", 0);
   test_alu(0, 255, ALU_OP_TST, 0, "0 TST", ALU_FLAG_ZERO);
+  //
   test_alu(255, 0, ALU_OP_NEG, 1, "255 NEG", 0);
   test_alu(127, 255, ALU_OP_NEG, 129, "127 NEG", ALU_FLAG_SIGN);
-// ADC
-// SBC
+  //
+  test_alu(100, 10, ALU_OP_ADC, 110, "100 ADC 10", 0);
+  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
+  test_alu(100, 10, ALU_OP_ADC, 111, "100 ADC 10", 0);
+  //
+  write_addr(ALU_FLAGS, 0);
+  test_alu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
+  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
+  test_alu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
+  Serial.println();
+  Serial.print(tests);
+  Serial.print(" tests, ");
+  Serial.print(passes);
+  Serial.print(" passed, ");
+  Serial.print(fails);
+  Serial.println(" failed");
   while (1);
 }
 //
@@ -148,8 +177,7 @@ void test_reg(int addr, int expected)
 {
   int y;
 
-  set_addr(addr);
-  y = read_data();
+  y = read_addr(addr);
   if (expected == -1)
   {
     Serial.print("Register ");
@@ -159,6 +187,7 @@ void test_reg(int addr, int expected)
   }
   else
   {
+    tests++;
     Serial.print("Read ");
     Serial.print(y);
     Serial.print(" from register ");
@@ -166,11 +195,13 @@ void test_reg(int addr, int expected)
     if (y == expected)
     {
       Serial.println(" - Pass");
+      passes++;
     }
     else
     {
       Serial.print(" - ** FAIL **, expected ");
       Serial.println(expected);
+      fails++;
     }
   }
 }
@@ -179,14 +210,17 @@ void test_flag(int expected)
 {
   int y;
 
-  set_addr(ALU_FLAGS);
-  y = read_data();
+//  set_addr(ALU_FLAGS);
+  tests++;
+  y = read_addr(ALU_FLAGS);
   if (y == expected)
   {
     Serial.println("Passed");
+    passes++;
   }
   else
   {
+    fails++;
     Serial.print("** FAILED ** Expected ");
     Serial.print(expected, HEX);
     Serial.print(" got ");
@@ -206,32 +240,31 @@ void test_alu(int op1, int op2, int func, int expected,
   const char *name, int flg)
 {
   int y;
-  
-  set_addr(ALU_OP1);
-  write_data(op1);
-  set_addr(ALU_OP2);
-  write_data(op2);
-  set_addr(ALU_FUNC);
-  write_data(func);
-  set_addr(ALU_RESULT);
-  y = read_data();
+
+  tests++;
+  write_addr(ALU_OP1, op1);
+  write_addr(ALU_OP2, op2);
+  write_addr(ALU_FUNC, func);
+  y = read_addr(ALU_RESULT);
   if (y == expected)
   {
     Serial.print(name);
-    Serial.println(" passed");
+    Serial.print(" passed");
+    passes++;
   }
   else
   {
+    fails++;
     Serial.print(name);
-    Serial.print(" failed - expected ");
+    Serial.print(" FAILED - expected ");
     Serial.print(expected);
     Serial.print(", got ");
-    Serial.println(y);
+    Serial.print(y);
   }
-  Serial.print("  Flags ");
+  Serial.print(", Flags ");
   test_flag(flg);
 }
-
+///////////////////////////////////////////////////////
 //
 //  Define some functions to access the CPU-FPGA bus.
 void set_addr(int addr)
@@ -290,4 +323,16 @@ int read_data()
   }
   digitalWrite(REG_READ, false);
   return y;
+}
+
+void write_addr(int addr, int data)
+{
+  set_addr(addr);
+  write_data(data);
+}
+
+int read_addr(int addr)
+{
+  set_addr(addr);
+  return read_data();
 }
