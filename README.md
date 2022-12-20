@@ -21,3 +21,7 @@ There are two main components in this repository:
 1 An Arduino sketch to load and test the designing
 2 The VHDL code for the CPU.
 
+## Documentation
+I'm starting to write some simple documentation.  Most of it should be linked from this
+section:
+* [Bus between CPU and FPGA](Bus.md)
