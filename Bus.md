@@ -40,7 +40,9 @@ On the CPU Side:
 | 16 | Read Data |
 
 On the FPGA Side:
+```
 data_bus <= bMKR_D(7 downto 0);
 addr_bus <= bMKR_D(14 downto 8);
 write_reg <= bMKR_A(0);
 read_reg <= bMKR_A(1);
+'''
