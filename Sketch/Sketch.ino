@@ -21,7 +21,7 @@ const int REG_WRITE = 15;
 const int REG_READ  = 16;
 //
 //  Number of registers to check
-const int REG_NUM = 10;
+const int REG_NUM = 15;
 //
 //  ALU Registers
 const int ALU_OP1 = 3;
@@ -49,9 +49,13 @@ const int ALU_FLAG_SIGN  = 2;
 const int ALU_FLAG_ZERO  = 4;
 const int ALU_FLAG_ERROR = 8;
 //
+//  Counter registers
+const int COUNT_LSB = 8;
+const int COUNT_MSB = 9;
+//
 //  Define expected results
 const int results[] =
-{10, 11, 12, 13, 14, 15, -1, -1,  8,  9, 10, 11, 12, 13, 14, 15,
+{10, 11, 12, 13, 14, 15, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15,
  16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
  32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
  48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
@@ -168,6 +172,17 @@ void loop()
   Serial.print(" passed, ");
   Serial.print(fails);
   Serial.println(" failed");
+  //
+  //  Show some counter values
+  x = read_addr(COUNT_LSB);
+  y = read_addr(COUNT_MSB);
+  Serial.print("Counter value ");
+  Serial.println(x + (y<<8));
+  delay(10);
+  x = read_addr(COUNT_LSB);
+  y = read_addr(COUNT_MSB);
+  Serial.print("Counter value ");
+  Serial.println(x + (y<<8));
   while (1);
 }
 //

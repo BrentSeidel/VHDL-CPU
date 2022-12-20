@@ -112,7 +112,20 @@ bMKR_D : inout std_logic_vector (14 downto 0)
 
 );
 end Development ;
-
+--
+--  Memory map
+--  Addr  Usage
+--    0   Reg0
+--    1   Reg1
+--    2   Reg2
+--    3   ALU Op 1
+--    4   ALU Op 2
+--    5   ALU Func
+--    6   ALU Flags
+--    7   ALU Result
+--    8   Counter LSB
+--    9   Counter MSB
+--
 architecture rtl of Development is
 --
 --  Translate the physical pins into internal signals
@@ -123,7 +136,7 @@ architecture rtl of Development is
 --
 --  Some constants
 --
-  constant max_reg : work.typedefs.byte := 7;  --  Number of assigned registers
+  constant max_reg : work.typedefs.byte := 9;  --  Number of assigned registers
 begin
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');
@@ -147,6 +160,10 @@ begin
     generic map(location => 3)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus);
+  counter : entity work.Counter
+    generic map(location => 8)
+	 port map(data => bMKR_D(7 downto 0),
+	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
 	--
 	--  Define values for unassigned addresses
 	--
