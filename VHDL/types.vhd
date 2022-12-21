@@ -27,19 +27,21 @@ package typedefs is
   function flags_to_vec(flag : in t_FLAGS) return std_logic_vector;
   function vec_to_flags(vec : in std_logic_vector) return t_FLAGS;
   --
-  --  Some constants
+  --  Some constants for ALU operations
   --
-  constant ALU_OP_NULL : integer := 0;
-  constant ALU_OP_ADD  : integer := 1;
-  constant ALU_OP_SUB  : integer := 2;
-  constant ALU_OP_NOT  : integer := 3;
+  constant ALU_OP_NULL : integer := 0;  --  No operation
+  constant ALU_OP_ADD  : integer := 1;  --  Add two numbers
+  constant ALU_OP_SUB  : integer := 2;  --  Subtract two numbers
+  constant ALU_OP_NOT  : integer := 3;  --  NOT of op 1.  Op 2 is ignored
   constant ALU_OP_AND  : integer := 4;
   constant ALU_OP_OR   : integer := 5;
   constant ALU_OP_XOR  : integer := 6;
-  constant ALU_OP_TST  : integer := 7;
-  constant ALU_OP_NEG  : integer := 8;
+  constant ALU_OP_TST  : integer := 7;  --  Test op 1 and set flags.  Op 2 is ignored
+  constant ALU_OP_NEG  : integer := 8;  --  Negative of op 1.  Op 2 is ignored
   constant ALU_OP_ADC  : integer := 9;  --  Add with carry
   constant ALU_OP_SBC  : integer := 10; --  Subtract with carry/borrow
+  constant ALU_OP_SHL  : integer := 11; --  Shift left
+  constant ALU_OP_SHR  : integer := 12; --  Shift right
 end package;
 
 package body typedefs is

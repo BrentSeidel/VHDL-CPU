@@ -165,7 +165,8 @@ begin
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
 	--
-	--  Define values for unassigned addresses
+	--  Define values for unassigned addresses.  The value returned is simply
+	--  the address value.  Writes are ignored.
 	--
 	data_bus : process(read_reg, write_reg, addr_bus)
 	begin

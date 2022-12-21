@@ -42,6 +42,8 @@ const int ALU_OP_TST = 7;
 const int ALU_OP_NEG = 8;
 const int ALU_OP_ADC = 9;
 const int ALU_OP_SBC = 10;
+const int ALU_OP_SHL = 11;
+const int ALU_OP_SHR = 12;
 //
 //  ALU Flags
 const int ALU_FLAG_CARRY = 1;
@@ -165,6 +167,20 @@ void loop()
   test_alu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
   write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
   test_alu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
+  //
+//const int ALU_OP_SHL = 11;
+  test_alu(1, 0, ALU_OP_SHL, 1, "1 SHL 0", 0);
+  test_alu(1, 1, ALU_OP_SHL, 2, "1 SHL 1", 0);
+  test_alu(1, 3, ALU_OP_SHL, 8, "1 SHL 3", 0);
+  test_alu(1, 7, ALU_OP_SHL, 128, "1 SHL 7", ALU_FLAG_SIGN);
+  test_alu(1, 8, ALU_OP_SHL, 0, "1 SHL 8", ALU_FLAG_ZERO +
+                                           ALU_FLAG_CARRY);
+  test_alu(128, 0, ALU_OP_SHR, 128, "128 SHR 0", ALU_FLAG_SIGN);
+  test_alu(128, 1, ALU_OP_SHR, 64, "128 SHR 1", 0);
+  test_alu(128, 3, ALU_OP_SHR, 16, "128 SHR 3", 0);
+  test_alu(128, 7, ALU_OP_SHR, 1, "128 SHR 7", 0);
+  test_alu(128, 8, ALU_OP_SHR, 0, "128 SHR 8", ALU_FLAG_ZERO);
+//const int ALU_OP_SHR = 12;
   Serial.println();
   Serial.print(tests);
   Serial.print(" tests, ");
