@@ -198,30 +198,26 @@ void loop()
   Serial.println(x + (y<<8));
   //
   //  Test CPU registers
-  cpu_write_reg(0x123456, 0);
-  cpu_write_reg(0x654321, 1);
-  cpu_write_reg(0xAAAAAA, 2);
-  cpu_write_reg(0x555555, 3);
-  cpu_write_reg(0xDEAD, 4);
-  cpu_write_reg(0xBEEF, 5);
-  x = cpu_read_reg(0);
-  Serial.print("CPU register 0 is ");
-  Serial.println(x, HEX);
-  x = cpu_read_reg(1);
-  Serial.print("CPU register 1 is ");
-  Serial.println(x, HEX);
-  x = cpu_read_reg(2);
-  Serial.print("CPU register 2 is ");
-  Serial.println(x, HEX);
-  x = cpu_read_reg(3);
-  Serial.print("CPU register 3 is ");
-  Serial.println(x, HEX);
-  x = cpu_read_reg(4);
-  Serial.print("CPU register 4 is ");
-  Serial.println(x, HEX);
-  x = cpu_read_reg(5);
-  Serial.print("CPU regster 5 is ");
-  Serial.println(x, HEX);
+  for (x = 0; x < 16; x++)
+  {
+    cpu_write_reg(x+10, x);
+  }
+  cpu_write_reg(0x12345678, 0);
+  cpu_write_reg(0x87654321, 1);
+  cpu_write_reg(0xAAAAAAAA, 2);
+  cpu_write_reg(0x55555555, 3);
+  cpu_write_reg(0xDEADBEEF, 4);
+  cpu_write_reg(0xBEEFDEAD, 5);
+  cpu_write_reg(0xFFFFFFFF, 6);
+  cpu_write_reg(0x55555555, 7);
+  for (x = 0; x < 16; x++)
+  {
+    y = cpu_read_reg(x);
+    Serial.print("CPU register ");
+    Serial.print(x);
+    Serial.print(" is ");
+    Serial.println(y, HEX);
+  }
   while (1);
 }
 //
@@ -299,11 +295,11 @@ void test_alu(int op1, int op2, int func, int expected,
 //--   11    R/W   ALU function
 //--   12    R/W   ALU flags
 //--   13    R/W   Enables
-//--                 7 - Renable 1
+//--                 7 - Renable 3
 //--                 6 - Renable 2
-//--                 5 - Renable 3
-//--                 4 - Wenable 1
-//--                 3 - Wenable 2
+//--                 5 - Renable 1
+//--                 1 - Wenable 2
+//--                 0 - Wenable 1
 //const int CPU_WDATA1  = CPU_BASE;
 //const int CPU_WDATA2  = CPU_BASE + 1;
 //const int CPU_WDATA3  = CPU_BASE + 2;
@@ -322,50 +318,33 @@ void test_alu(int op1, int op2, int func, int expected,
 //  Write to a CPU register using write port 2
 void cpu_write_reg(int data, int addr)
 {
+  int temp;
   write_addr(CPU_ENABLES, 0);
+  write_addr(CPU_WADDR12, addr & 0xF);
   Serial.print("Writing ");
   Serial.print(data, HEX);
   Serial.print(" to register ");
   Serial.println(addr);
   write_addr(CPU_WDATA1, data & 0xFF);
-  Serial.print("  wrote ");
-  Serial.println(data & 0xFF, HEX);
   write_addr(CPU_WDATA2, (data >> 8) & 0xFF);
-  Serial.print("  wrote ");
-  Serial.println((data >> 8) & 0xFF, HEX);
   write_addr(CPU_WDATA3, (data >> 16) & 0xFF);
-  Serial.print("  wrote ");
-  Serial.println((data >> 16) & 0xFF, HEX);
   write_addr(CPU_WDATA4, (data >> 24) & 0xFF);
-  Serial.print("  wrote ");
-  Serial.println((data >> 24) & 0xFF, HEX);
-  write_addr(CPU_WADDR12, addr & 0xF);
-  write_addr(CPU_ENABLES, 8);
+  write_addr(CPU_ENABLES, 2);
   write_addr(CPU_ENABLES, 0);
 }
 //
-//  Read from a CPU regster using read port 3
+//  Read from a CPU register using read port 3
 int cpu_read_reg(int addr)
 {
   int temp;
 
   write_addr(CPU_ENABLES, 0);
   write_addr(CPU_RADDR3, (addr & 0xF) << 4);
-  write_addr(CPU_ENABLES, 32);
-  Serial.print("Reading from register ");
-  Serial.println(addr);
+  write_addr(CPU_ENABLES, 1 << 7);
   temp = read_addr(CPU_RDATA1) & 0xFF;
-  Serial.print("  read ");
-  Serial.println(temp, HEX);
-  temp += (read_addr(CPU_RDATA2) << 8) & 0xFF;
-  Serial.print("  read ");
-  Serial.println(temp, HEX);
-  temp += (read_addr(CPU_RDATA3) << 16) & 0xFF;
-  Serial.print("  read ");
-  Serial.println(temp, HEX);
-  temp += (read_addr(CPU_RDATA4) << 24) & 0xFF;
-  Serial.print("  read ");
-  Serial.println(temp, HEX);
+  temp += (read_addr(CPU_RDATA2) & 0xFF) << 8;
+  temp += (read_addr(CPU_RDATA3) & 0xFF) << 16;
+  temp += (read_addr(CPU_RDATA4) & 0xFF) << 24;
   write_addr(CPU_ENABLES, 0);
   return temp;
 }

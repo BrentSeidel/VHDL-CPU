@@ -24,11 +24,11 @@ use ieee.std_logic_unsigned.all ;
 --   11    R/W   ALU function
 --   12    R/W   ALU flags
 --   13    R/W   Enables
---                 7 - Renable 1
+--                 7 - Renable 3
 --                 6 - Renable 2
---                 5 - Renable 3
---                 4 - Wenable 1
---                 3 - Wenable 2
+--                 5 - Renable 1
+--                 1 - Wenable 2
+--                 0 - Wenable 1
 --
 entity CPU32 is
   generic (location : work.typedefs.byte);
@@ -322,46 +322,17 @@ begin
   --
   --  Register for enable bits
   --
---  function std_to_bool(b : in std_logic) return boolean is
---  begin
---    if b = '1' then
---	   return true;
---	 else
---	   return false;
---	 end if;
---  end;
-  --
   enable_reg : process(out_enable, set, addr, data)
     variable saved : std_logic_vector (7 downto 0) := (others => '0');
   begin
 	 if addr = enable_addr then
       if set then
 	     saved := data;
-		  if data(7) = '1' then
-		    enable_r1 <= true;
-		  else
-		    enable_r1 <= false;
-		  end if;
-		  if data(6) = '1' then
-		    enable_r2 <= true;
-		  else
-		    enable_r2 <= false;
-		  end if;
-		  if data(5) = '1' then
-		    enable_r3 <= true;
-		  else
-		    enable_r3 <= false;
-		  end if;
-		  if data(4) = '1' then
-		    enable_w1 <= true;
-		  else
-		    enable_w1 <= false;
-		  end if;
-		  if data(3) = '1' then
-		    enable_w2 <= true;
-		  else
-		    enable_w2 <= false;
-		  end if;
+		  enable_r3 <= work.typedefs.std_to_bool(data(7));
+		  enable_r2 <= work.typedefs.std_to_bool(data(6));
+		  enable_r1 <= work.typedefs.std_to_bool(data(5));
+		  enable_w2 <= work.typedefs.std_to_bool(data(1));
+		  enable_w1 <= work.typedefs.std_to_bool(data(0));
 	   elsif out_enable then
 	     data <= saved;
       else

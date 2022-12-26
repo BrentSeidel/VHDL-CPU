@@ -21,6 +21,8 @@ package typedefs is
   --
   --  Some conversion functions
   --
+  function std_to_bool(b : in std_logic) return boolean;
+  --
   function vec_to_byte(vec : in std_logic_vector) return byte;
   function byte_to_vec(data : in byte) return std_logic_vector;
   --
