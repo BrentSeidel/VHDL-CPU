@@ -24,11 +24,12 @@ const int REG_READ  = 16;
 const int REG_NUM = 15;
 //
 //  ALU Registers
-const int ALU_OP1 = 3;
-const int ALU_OP2 = 4;
-const int ALU_FUNC = 5;
-const int ALU_FLAGS = 6;
-const int ALU_RESULT = 7;
+const int ALU_BASE   = 3;
+const int ALU_OP1    = ALU_BASE;
+const int ALU_OP2    = ALU_BASE + 1;
+const int ALU_FUNC   = ALU_BASE + 2;
+const int ALU_FLAGS  = ALU_BASE + 3;
+const int ALU_RESULT = ALU_BASE + 4;
 //
 //  ALU Operations
 const int ALU_OP_NULL = 0;
@@ -55,12 +56,22 @@ const int ALU_FLAG_ERROR = 8;
 const int COUNT_LSB = 8;
 const int COUNT_MSB = 9;
 //
-//  Define expected results
-const int results[] =
-{10, 11, 12, 13, 14, 15, -1, -1, -1, -1, 10, 11, 12, 13, 14, 15,
- 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
- 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
- 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
+//  CPU control registers
+const int CPU_BASE = 10;
+const int CPU_WDATA1  = CPU_BASE;
+const int CPU_WDATA2  = CPU_BASE + 1;
+const int CPU_WDATA3  = CPU_BASE + 2;
+const int CPU_WDATA4  = CPU_BASE + 3;
+const int CPU_RDATA1  = CPU_BASE + 4;
+const int CPU_RDATA2  = CPU_BASE + 5;
+const int CPU_RDATA3  = CPU_BASE + 6;
+const int CPU_RDATA4  = CPU_BASE + 7;
+const int CPU_RADDR12 = CPU_BASE + 8;
+const int CPU_RADDR3  = CPU_BASE + 9;
+const int CPU_WADDR12 = CPU_BASE + 10;
+const int CPU_FUNCT   = CPU_BASE + 11;
+const int CPU_FLAGS   = CPU_BASE + 12;
+const int CPU_ENABLES = CPU_BASE + 13;
 //
 //  Global counters for test pass and fail
 int tests  = 0;
@@ -73,11 +84,12 @@ void write_data(int data);
 int read_data();
 void write_addr(int addr, int data);
 int read_addr(int addr);
-void test_reg(int addr, int expected);
 void test_alu(int op1, int op2, int func, int expected,
-  const char *name, int flg);
+              const char *name, int flg);
 void test_flag(int expected);
 void print_flags(int flag);
+void cpu_write_reg(int data, int addr);
+int cpu_read_reg(int addr);
 
 void setup()
 {
@@ -113,21 +125,6 @@ void loop()
   int x;
   int y;
 
-  Serial.println("Testing registers.");
-  Serial.println("Writing values.");
-  for (x = 0; x < REG_NUM; x++)
-  {
-    write_addr(x, x + 10);
-    Serial.print("Wrote ");
-    Serial.print(x + 10);
-    Serial.print(" to register ");
-    Serial.println(x);
-  }
-  Serial.println("Reading values.");
-  for (x = 0; x < REG_NUM; x++)
-  {
-    test_reg(x, results[x]);
-  }
   Serial.println("Testing ALU.");
   write_addr(ALU_FLAGS, 0);
   x = read_addr(ALU_FLAGS);
@@ -168,19 +165,19 @@ void loop()
   write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
   test_alu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
   //
-//const int ALU_OP_SHL = 11;
   test_alu(1, 0, ALU_OP_SHL, 1, "1 SHL 0", 0);
   test_alu(1, 1, ALU_OP_SHL, 2, "1 SHL 1", 0);
   test_alu(1, 3, ALU_OP_SHL, 8, "1 SHL 3", 0);
   test_alu(1, 7, ALU_OP_SHL, 128, "1 SHL 7", ALU_FLAG_SIGN);
   test_alu(1, 8, ALU_OP_SHL, 0, "1 SHL 8", ALU_FLAG_ZERO +
                                            ALU_FLAG_CARRY);
+  //
   test_alu(128, 0, ALU_OP_SHR, 128, "128 SHR 0", ALU_FLAG_SIGN);
   test_alu(128, 1, ALU_OP_SHR, 64, "128 SHR 1", 0);
   test_alu(128, 3, ALU_OP_SHR, 16, "128 SHR 3", 0);
   test_alu(128, 7, ALU_OP_SHR, 1, "128 SHR 7", 0);
   test_alu(128, 8, ALU_OP_SHR, 0, "128 SHR 8", ALU_FLAG_ZERO);
-//const int ALU_OP_SHR = 12;
+  //
   Serial.println();
   Serial.print(tests);
   Serial.print(" tests, ");
@@ -199,49 +196,41 @@ void loop()
   y = read_addr(COUNT_MSB);
   Serial.print("Counter value ");
   Serial.println(x + (y<<8));
+  //
+  //  Test CPU registers
+  cpu_write_reg(0x123456, 0);
+  cpu_write_reg(0x654321, 1);
+  cpu_write_reg(0xAAAAAA, 2);
+  cpu_write_reg(0x555555, 3);
+  cpu_write_reg(0xDEAD, 4);
+  cpu_write_reg(0xBEEF, 5);
+  x = cpu_read_reg(0);
+  Serial.print("CPU register 0 is ");
+  Serial.println(x, HEX);
+  x = cpu_read_reg(1);
+  Serial.print("CPU register 1 is ");
+  Serial.println(x, HEX);
+  x = cpu_read_reg(2);
+  Serial.print("CPU register 2 is ");
+  Serial.println(x, HEX);
+  x = cpu_read_reg(3);
+  Serial.print("CPU register 3 is ");
+  Serial.println(x, HEX);
+  x = cpu_read_reg(4);
+  Serial.print("CPU register 4 is ");
+  Serial.println(x, HEX);
+  x = cpu_read_reg(5);
+  Serial.print("CPU regster 5 is ");
+  Serial.println(x, HEX);
   while (1);
 }
 //
 //  Define some test functions
 //
-void test_reg(int addr, int expected)
-{
-  int y;
-
-  y = read_addr(addr);
-  if (expected == -1)
-  {
-    Serial.print("Register ");
-    Serial.print(addr);
-    Serial.print(" value is don't care, read ");
-    Serial.println(y);
-  }
-  else
-  {
-    tests++;
-    Serial.print("Read ");
-    Serial.print(y);
-    Serial.print(" from register ");
-    Serial.print(addr);
-    if (y == expected)
-    {
-      Serial.println(" - Pass");
-      passes++;
-    }
-    else
-    {
-      Serial.print(" - ** FAIL **, expected ");
-      Serial.println(expected);
-      fails++;
-    }
-  }
-}
-
 void test_flag(int expected)
 {
   int y;
 
-//  set_addr(ALU_FLAGS);
   tests++;
   y = read_addr(ALU_FLAGS);
   if (y == expected)
@@ -294,6 +283,91 @@ void test_alu(int op1, int op2, int func, int expected,
   }
   Serial.print(", Flags ");
   test_flag(flg);
+}
+//--  Base+  Type  Use
+//--    0    R/W   Write data bits 7-0
+//--    1    R/W   Write data bits 15-8
+//--    2    R/W   Write data bits 23-16
+//--    3    R/W   Write data bits 31-24
+//--    4     RO   Read data bits 7-0
+//--    5     RO   Read data bits 15-8
+//--    6     RO   Read data bits 23-16
+//--    7     RO   Read data bits 31-24
+//--    8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
+//--    9    R/W   Raddr 3 (bits 7-4)
+//--   10    R/W   Waddr 1 (bits 7-4) Waddr 2 (bits 3-0)
+//--   11    R/W   ALU function
+//--   12    R/W   ALU flags
+//--   13    R/W   Enables
+//--                 7 - Renable 1
+//--                 6 - Renable 2
+//--                 5 - Renable 3
+//--                 4 - Wenable 1
+//--                 3 - Wenable 2
+//const int CPU_WDATA1  = CPU_BASE;
+//const int CPU_WDATA2  = CPU_BASE + 1;
+//const int CPU_WDATA3  = CPU_BASE + 2;
+//const int CPU_WDATA4  = CPU_BASE + 3;
+//const int CPU_RDATA1  = CPU_BASE + 4;
+//const int CPU_RDATA2  = CPU_BASE + 5;
+//const int CPU_RDATA3  = CPU_BASE + 6;
+//const int CPU_RDATA4  = CPU_BASE + 7;
+//const int CPU_RADDR12 = CPU_BASE + 8;
+//const int CPU_RADDR3  = CPU_BASE + 9;
+//const int CPU_WADDR12 = CPU_BASE + 10;
+//const int CPU_FUNCT   = CPU_BASE + 11;
+//const int CPU_FLAGS   = CPU_BASE + 12;
+//const int CPU_ENABLES = CPU_BASE + 13;
+//
+//  Write to a CPU register using write port 2
+void cpu_write_reg(int data, int addr)
+{
+  write_addr(CPU_ENABLES, 0);
+  Serial.print("Writing ");
+  Serial.print(data, HEX);
+  Serial.print(" to register ");
+  Serial.println(addr);
+  write_addr(CPU_WDATA1, data & 0xFF);
+  Serial.print("  wrote ");
+  Serial.println(data & 0xFF, HEX);
+  write_addr(CPU_WDATA2, (data >> 8) & 0xFF);
+  Serial.print("  wrote ");
+  Serial.println((data >> 8) & 0xFF, HEX);
+  write_addr(CPU_WDATA3, (data >> 16) & 0xFF);
+  Serial.print("  wrote ");
+  Serial.println((data >> 16) & 0xFF, HEX);
+  write_addr(CPU_WDATA4, (data >> 24) & 0xFF);
+  Serial.print("  wrote ");
+  Serial.println((data >> 24) & 0xFF, HEX);
+  write_addr(CPU_WADDR12, addr & 0xF);
+  write_addr(CPU_ENABLES, 8);
+  write_addr(CPU_ENABLES, 0);
+}
+//
+//  Read from a CPU regster using read port 3
+int cpu_read_reg(int addr)
+{
+  int temp;
+
+  write_addr(CPU_ENABLES, 0);
+  write_addr(CPU_RADDR3, (addr & 0xF) << 4);
+  write_addr(CPU_ENABLES, 32);
+  Serial.print("Reading from register ");
+  Serial.println(addr);
+  temp = read_addr(CPU_RDATA1) & 0xFF;
+  Serial.print("  read ");
+  Serial.println(temp, HEX);
+  temp += (read_addr(CPU_RDATA2) << 8) & 0xFF;
+  Serial.print("  read ");
+  Serial.println(temp, HEX);
+  temp += (read_addr(CPU_RDATA3) << 16) & 0xFF;
+  Serial.print("  read ");
+  Serial.println(temp, HEX);
+  temp += (read_addr(CPU_RDATA4) << 24) & 0xFF;
+  Serial.print("  read ");
+  Serial.println(temp, HEX);
+  write_addr(CPU_ENABLES, 0);
+  return temp;
 }
 ///////////////////////////////////////////////////////
 //

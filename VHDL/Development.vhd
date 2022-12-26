@@ -136,7 +136,7 @@ architecture rtl of Development is
 --
 --  Some constants
 --
-  constant max_reg : work.typedefs.byte := 9;  --  Number of assigned registers
+  constant max_reg : work.typedefs.byte := 24;  --  Number of assigned registers
 begin
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');
@@ -164,6 +164,10 @@ begin
     generic map(location => 8)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
+  cpu32 : entity work.CPU32
+    generic map(location => 10)
+	 port map(data => bMKR_D(7 downto 0),
+	           out_enable => read_reg, set => write_reg, addr => addr_bus);
 	--
 	--  Define values for unassigned addresses.  The value returned is simply
 	--  the address value.  Writes are ignored.

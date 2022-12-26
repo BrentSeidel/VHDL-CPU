@@ -41,7 +41,7 @@ architecture rtl of CPU is
 
 begin
   reg_file :  work.register_file
-    generic map(count => 16, size => size)
+    generic map(count => 4, size => size)
 	 port map(r_addr1 => r_addr1, 
              r_data1 => op1,      --  Internal
              r_en1   => r_en1,

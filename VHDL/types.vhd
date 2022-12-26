@@ -43,8 +43,20 @@ package typedefs is
   constant ALU_OP_SHL  : integer := 11; --  Shift left
   constant ALU_OP_SHR  : integer := 12; --  Shift right
 end package;
-
+--
+--  Define some useful type conversions
+--
 package body typedefs is
+  --
+  function std_to_bool(b : in std_logic) return boolean is
+  begin
+    if b = '1' then
+	   return true;
+	 else
+	   return false;
+	 end if;
+  end;
+  --
   function vec_to_byte(vec : in std_logic_vector) return byte is
   begin
     return work.typedefs.byte(to_integer(unsigned(vec)));
