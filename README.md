@@ -25,3 +25,10 @@ There are two main components in this repository:
 I'm starting to write some simple documentation.  Most of it should be linked from this
 section:
 * [Bus between CPU and FPGA](Bus.md)
+
+## Lessons Learned
+This is a list of things that I've learned.  These are the more major items that have had
+me stumped for a few days, not minor items.
+* If you want to use a function from a package, make sure that the function is listed in
+the package spec.  This should have been obvious to an Ada programer, but...
+
