@@ -200,7 +200,7 @@ void loop()
   //  Test CPU registers
   for (x = 0; x < 16; x++)
   {
-    cpu_write_reg(x+10, x);
+    cpu_write_reg(x+0x100, x);
   }
 //  cpu_write_reg(0x12345678, 0);
 //  cpu_write_reg(0x87654321, 1);
@@ -216,7 +216,7 @@ void loop()
     Serial.print("CPU register ");
     Serial.print(x);
     Serial.print(" is ");
-    Serial.println(y, BIN);
+    Serial.println(y, HEX);
   }
   while (1);
 }

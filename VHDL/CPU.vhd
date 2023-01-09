@@ -11,19 +11,19 @@ use ieee.numeric_std.all;
 
 entity CPU is
   generic(count : integer; size : integer);
-  port(r_addr1 : in natural range 0 to 2**(count-1);
+  port(r_addr1 : in natural range 0 to (2**count)-1;
 --     r_data1 : out std_logic_vector (1 downto 0);
 		 r_en1   : in boolean;
-		 r_addr2 : in natural range 0 to 2**(count-1);
+		 r_addr2 : in natural range 0 to (2**count)-1;
 --		 r_data2 : out std_logic_vector (size-1 downto 0);
 		 r_en2   : in boolean;
-		 r_addr3 : in natural range 0 to 2**(count-1);
+		 r_addr3 : in natural range 0 to (2**count)-1;
 		 r_data3 : out std_logic_vector (size-1 downto 0);
 		 r_en3   : in boolean;
-		 w_addr1 : in natural range 0 to 2**(count-1);
+		 w_addr1 : in natural range 0 to (2**count)-1;
 --		 w_data1 : in std_logic_vector (size-1 downto 0);
 		 w_en1   : in boolean;
-		 w_addr2 : in natural range 0 to 2**(count-1);
+		 w_addr2 : in natural range 0 to (2**count)-1;
 		 w_data2 : in std_logic_vector (size-1 downto 0);
 		 w_en2   : in boolean;
 --     op1       : in std_logic_vector (size-1 downto 0);
@@ -41,7 +41,7 @@ architecture rtl of CPU is
 
 begin
   reg_file :  work.register_file
-    generic map(count => 4, size => size)
+    generic map(count => count, size => size)
 	 port map(r_addr1 => r_addr1, 
              r_data1 => op1,      --  Internal
              r_en1   => r_en1,

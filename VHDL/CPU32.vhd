@@ -39,54 +39,56 @@ entity CPU32 is
 end entity CPU32;
 
 architecture rtl of CPU32 is
-  constant Wdata1_addr : work.typedefs.byte := location;
-  constant Wdata2_addr : work.typedefs.byte := location + 1;
-  constant Wdata3_addr : work.typedefs.byte := location + 2;
-  constant Wdata4_addr : work.typedefs.byte := location + 3;
-  constant Rdata1_addr : work.typedefs.byte := location + 4;
-  constant Rdata2_addr : work.typedefs.byte := location + 5;
-  constant Rdata3_addr : work.typedefs.byte := location + 6;
-  constant Rdata4_addr : work.typedefs.byte := location + 7;
+  constant Wdata1_addr  : work.typedefs.byte := location;
+  constant Wdata2_addr  : work.typedefs.byte := location + 1;
+  constant Wdata3_addr  : work.typedefs.byte := location + 2;
+  constant Wdata4_addr  : work.typedefs.byte := location + 3;
+  constant Rdata1_addr  : work.typedefs.byte := location + 4;
+  constant Rdata2_addr  : work.typedefs.byte := location + 5;
+  constant Rdata3_addr  : work.typedefs.byte := location + 6;
+  constant Rdata4_addr  : work.typedefs.byte := location + 7;
   constant Raddr12_addr : work.typedefs.byte := location + 8;
-  constant Raddr3_addr : work.typedefs.byte := location + 9;
+  constant Raddr3_addr  : work.typedefs.byte := location + 9;
   constant Waddr12_addr : work.typedefs.byte := location + 10;
-  constant funct_addr  : work.typedefs.byte := location + 11;
-  constant flag_addr   : work.typedefs.byte := location + 12;
-  constant enable_addr : work.typedefs.byte := location + 13;
-  signal read_bus      : std_logic_vector (31 downto 0);
-  signal write_bus     : std_logic_vector (31 downto 0);
-  signal raddr1        : natural range 0 to 15;
-  signal raddr2        : natural range 0 to 15;
-  signal raddr3        : natural range 0 to 15;
-  signal waddr1        : natural range 0 to 15;
-  signal waddr2        : natural range 0 to 15;
-  signal enable_r1     : boolean;
-  signal enable_r2     : boolean;
-  signal enable_r3     : boolean;
-  signal enable_w1     : boolean;
-  signal enable_w2     : boolean;
-  signal func_value    : work.typedefs.byte;
-  signal flags_pre     : work.typedefs.t_FLAGS;
-  signal flags_post    : work.typedefs.t_FLAGS;
+  constant funct_addr   : work.typedefs.byte := location + 11;
+  constant flag_addr    : work.typedefs.byte := location + 12;
+  constant enable_addr  : work.typedefs.byte := location + 13;
+  constant count        : natural := 4;  --  Number of bits in register address
+  constant size         : natural := 32; --  Number of bits in word
+  signal read_bus       : std_logic_vector (size-1 downto 0);
+  signal write_bus      : std_logic_vector (size-1 downto 0);
+  signal raddr1         : natural range 0 to (2**count)-1;
+  signal raddr2         : natural range 0 to (2**count)-1;
+  signal raddr3         : natural range 0 to (2**count)-1;
+  signal waddr1         : natural range 0 to (2**count)-1;
+  signal waddr2         : natural range 0 to (2**count)-1;
+  signal enable_r1      : boolean;
+  signal enable_r2      : boolean;
+  signal enable_r3      : boolean;
+  signal enable_w1      : boolean;
+  signal enable_w2      : boolean;
+  signal func_value     : work.typedefs.byte;
+  signal flags_pre      : work.typedefs.t_FLAGS;
+  signal flags_post     : work.typedefs.t_FLAGS;
 begin
 
   cpu : work.cpu
-  generic map (count => 4, size => 32)
-  port map (r_addr1 => raddr1,
+  generic map (count => count, size => size)
+  port map (r_addr1 => raddr1,  --  Read port 1
 		 r_en1     => enable_r1,
-		 r_addr2   => raddr2,
+		 r_addr2   => raddr2,     --  Read port 2
 		 r_en2     => enable_r2,
-		 r_addr3   => raddr3,
+		 r_addr3   => raddr3,     --  Read port 3
 		 r_data3   => read_bus,
 		 r_en3     => enable_r3,
-		 w_addr1   => waddr1,
+		 w_addr1   => waddr1,     --  Write port 1
 		 w_en1     => enable_w1,
-		 w_addr2   => waddr2,
+		 w_addr2   => waddr2,     --  Write port 2
 		 w_data2   => write_bus,
 		 w_en2     => enable_w2,
-       funct     => func_value,
-       flags_in  => flags_pre,
-       flags_out => flags_post);
+       funct     => func_value, --  ALU Function
+       flags_in  => flags_pre,  --  ALU Flags in
+       flags_out => flags_post);  --  ALU Flags out
   --
   --  Register for write data 1
   --
@@ -126,7 +128,7 @@ begin
     end if;
   end process wdata2_reg;
   --
-  --  Register for write data 1
+  --  Register for write data 3
   --
   wdata3_reg : process(out_enable, set, addr, data)
     variable saved : std_logic_vector (7 downto 0) := (others => '0');

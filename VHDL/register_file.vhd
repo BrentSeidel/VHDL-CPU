@@ -14,7 +14,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
 entity register_file is
-  generic(count : integer;  --  Number of bits to address registers
+  generic(count : integer;  --  Number of bits in register address
           size : integer);  --  Size of registers
   port(r_addr1 : in natural range 0 to (2**count)-1;     --  Read port 1
        r_data1 : out std_logic_vector (size-1 downto 0);
@@ -35,25 +35,31 @@ end entity register_file;
 
 architecture rtl of register_file is
 begin
-  reg_access: process(r_en1, r_en2, r_en3,
-		 w_en1, w_en2)
---    subtype addr is natural range 0 to 2**(count-1);
-	 type registers is array(0 to (2**count)-1) of std_logic_vector (size-1 downto 0);
-	 variable reg_file : registers;
+  reg_access: process(r_en1, r_en2, r_en3, w_en1, w_en2,
+      w_data1, w_data2, w_addr1, w_addr2, r_addr1, r_addr2, r_addr3)
+	 subtype word is std_logic_vector (size-1 downto 0);
+--	 subtype word is bit_vector (size-1 downto 0);
+	 type registers is array(natural range <>) of word;
+	 variable reg_file : registers ((2**count)-1 downto 0);
   begin
     if w_en1 then  --  Write port 1
+--	   reg_file(w_addr1) := to_bitvector(w_data1);
 	   reg_file(w_addr1) := w_data1;
 	 end if;
     if w_en2 then  --  Write port 2
+--	   reg_file(w_addr2) := to_bitvector(w_data2);
 	   reg_file(w_addr2) := w_data2;
 	 end if;
 	 if r_en1 then  --  Read port 1
+--	   r_data1 <= to_stdlogicvector(reg_file(r_addr1));
 	   r_data1 <= reg_file(r_addr1);
 	 end if;
 	 if r_en2 then  --  Read port 2
+--	   r_data2 <= to_stdlogicvector(reg_file(r_addr2));
 	   r_data2 <= reg_file(r_addr2);
 	 end if;
 	 if r_en3 then  --  Read port 3
+--	   r_data3 <= to_stdlogicvector(reg_file(r_addr3));
 	   r_data3 <= reg_file(r_addr3);
 	 end if;
   end process reg_access;
