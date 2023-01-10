@@ -39,7 +39,7 @@ begin
     flags_out <= flags_in;
     case funct is
       when work.typedefs.ALU_OP_NULL =>  -- No operation
-        temp := (others => 'Z');
+        temp := (others => '0');
       when work.typedefs.ALU_OP_ADD =>
         temp := t1 + t2;
       when work.typedefs.ALU_OP_ADC =>

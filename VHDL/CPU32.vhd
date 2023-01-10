@@ -271,8 +271,8 @@ begin
 	 if addr = Raddr12_addr then
       if set then
 	     saved := data;
-		  raddr1 <= work.typedefs.vec_to_byte(data(7 downto 4));
-		  raddr2 <= work.typedefs.vec_to_byte(data(3 downto 0));
+		  raddr1 <= work.typedefs.vec_to_byte(saved(7 downto 4));
+		  raddr2 <= work.typedefs.vec_to_byte(saved(3 downto 0));
 	   elsif out_enable then
 	     data <= saved;
       else
@@ -291,7 +291,7 @@ begin
 	 if addr = Raddr3_addr then
       if set then
 	     saved := data;
-		  raddr3 <= work.typedefs.vec_to_byte(data(7 downto 4));
+		  raddr3 <= work.typedefs.vec_to_byte(saved(7 downto 4));
 	   elsif out_enable then
 	     data <= saved;
       else
@@ -310,8 +310,8 @@ begin
 	 if addr = Waddr12_addr then
       if set then
 	     saved := data;
-		  waddr1 <= work.typedefs.vec_to_byte(data(7 downto 4));
-		  waddr2 <= work.typedefs.vec_to_byte(data(3 downto 0));
+		  waddr1 <= work.typedefs.vec_to_byte(saved(7 downto 4));
+		  waddr2 <= work.typedefs.vec_to_byte(saved(3 downto 0));
 	   elsif out_enable then
 	     data <= saved;
       else
@@ -330,11 +330,12 @@ begin
 	 if addr = enable_addr then
       if set then
 	     saved := data;
-		  enable_r3 <= work.typedefs.std_to_bool(data(7));
-		  enable_r2 <= work.typedefs.std_to_bool(data(6));
-		  enable_r1 <= work.typedefs.std_to_bool(data(5));
-		  enable_w2 <= work.typedefs.std_to_bool(data(1));
-		  enable_w1 <= work.typedefs.std_to_bool(data(0));
+		  enable_r3 <= work.typedefs.std_to_bool(saved(7));
+		  enable_r2 <= work.typedefs.std_to_bool(saved(6));
+		  enable_r1 <= work.typedefs.std_to_bool(saved(5));
+		  enable_w2 <= work.typedefs.std_to_bool(saved(1));
+		  enable_w1 <= work.typedefs.std_to_bool(saved(0));
+--		  enable_w1 <= false;
 	   elsif out_enable then
 	     data <= saved;
       else

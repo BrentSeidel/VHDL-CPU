@@ -197,6 +197,10 @@ void loop()
   Serial.print("Counter value ");
   Serial.println(x + (y<<8));
   //
+  write_addr(CPU_FUNCT, 0);
+  write_addr(CPU_ENABLES, 0);
+  write_addr(CPU_WADDR12, 0);
+  //
   //  Test CPU registers
   for (x = 0; x < 16; x++)
   {
@@ -329,7 +333,7 @@ void cpu_write_reg(int data, int addr)
   write_addr(CPU_WDATA2, (data >> 8) & 0xFF);
   write_addr(CPU_WDATA3, (data >> 16) & 0xFF);
   write_addr(CPU_WDATA4, (data >> 24) & 0xFF);
-  write_addr(CPU_ENABLES, 2);
+  write_addr(CPU_ENABLES, 1 << 1);
   write_addr(CPU_ENABLES, 0);
 }
 //
