@@ -206,14 +206,14 @@ void loop()
   {
     cpu_write_reg(x+0x100, x);
   }
-//  cpu_write_reg(0x12345678, 0);
-//  cpu_write_reg(0x87654321, 1);
-//  cpu_write_reg(0xAAAAAAAA, 2);
-//  cpu_write_reg(0x55555555, 3);
-//  cpu_write_reg(0xDEADBEEF, 4);
-//  cpu_write_reg(0xBEEFDEAD, 5);
-//  cpu_write_reg(0xFFFFFFFF, 6);
-//  cpu_write_reg(0x55555555, 7);
+  cpu_write_reg(0x12345678, 0);
+  cpu_write_reg(0x87654321, 1);
+  cpu_write_reg(0xAAAAAAAA, 2);
+  cpu_write_reg(0x55555555, 3);
+  cpu_write_reg(0xDEADBEEF, 4);
+  cpu_write_reg(0xBEEFDEAD, 5);
+  cpu_write_reg(0xFFFFFFFF, 6);
+  cpu_write_reg(0x55555555, 7);
   for (x = 0; x < 16; x++)
   {
     y = cpu_read_reg(x);

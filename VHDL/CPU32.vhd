@@ -49,7 +49,7 @@ architecture rtl of CPU32 is
   constant Rdata4_addr  : work.typedefs.byte := location + 7;
   constant Raddr12_addr : work.typedefs.byte := location + 8;
   constant Raddr3_addr  : work.typedefs.byte := location + 9;
-  constant Waddr12_addr : work.typedefs.byte := location + 10;
+  constant Waddr_addr   : work.typedefs.byte := location + 10;
   constant funct_addr   : work.typedefs.byte := location + 11;
   constant flag_addr    : work.typedefs.byte := location + 12;
   constant enable_addr  : work.typedefs.byte := location + 13;
@@ -60,13 +60,12 @@ architecture rtl of CPU32 is
   signal raddr1         : natural range 0 to (2**count)-1;
   signal raddr2         : natural range 0 to (2**count)-1;
   signal raddr3         : natural range 0 to (2**count)-1;
-  signal waddr1         : natural range 0 to (2**count)-1;
-  signal waddr2         : natural range 0 to (2**count)-1;
-  signal enable_r1      : boolean;
-  signal enable_r2      : boolean;
-  signal enable_r3      : boolean;
-  signal enable_w1      : boolean;
-  signal enable_w2      : boolean;
+  signal waddr         : natural range 0 to (2**count)-1;
+  signal enable_r1      : bit;
+  signal enable_r2      : bit;
+  signal enable_r3      : bit;
+  signal enable_w1      : bit;
+  signal enable_w2      : bit;
   signal func_value     : work.typedefs.byte;
   signal flags_pre      : work.typedefs.t_FLAGS;
   signal flags_post     : work.typedefs.t_FLAGS;
@@ -81,10 +80,9 @@ begin
 		 r_addr3   => raddr3,     --  Read port 3
 		 r_data3   => read_bus,
 		 r_en3     => enable_r3,
-		 w_addr1   => waddr1,     --  Write port 1
-		 w_en1     => enable_w1,
-		 w_addr2   => waddr2,     --  Write port 2
-		 w_data2   => write_bus,
+		 w_en1     => enable_w1,  --  Write port
+		 w_addr    => waddr,
+		 w_data    => write_bus,
 		 w_en2     => enable_w2,
        funct     => func_value, --  ALU Function
        flags_in  => flags_pre,  --  ALU Flags in
@@ -304,14 +302,13 @@ begin
   --
   --  Register for address w1 and w2
   --
-  waddr12_reg : process(out_enable, set, addr, data)
+  waddr_reg : process(out_enable, set, addr, data)
     variable saved : std_logic_vector (7 downto 0) := (others => '0');
   begin
-	 if addr = Waddr12_addr then
+	 if addr = Waddr_addr then
       if set then
 	     saved := data;
-		  waddr1 <= work.typedefs.vec_to_byte(saved(7 downto 4));
-		  waddr2 <= work.typedefs.vec_to_byte(saved(3 downto 0));
+		  waddr <= work.typedefs.vec_to_byte(saved(3 downto 0));
 	   elsif out_enable then
 	     data <= saved;
       else
@@ -320,24 +317,24 @@ begin
 	 else
       data <= (others => 'Z');
     end if;
-  end process waddr12_reg;
+  end process waddr_reg;
   --
   --  Register for enable bits
   --
   enable_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
+--    variable saved : std_logic_vector (7 downto 0) := (others => '0');
+    variable saved : bit_vector (7 downto 0) := (others => '0');
   begin
 	 if addr = enable_addr then
       if set then
-	     saved := data;
-		  enable_r3 <= work.typedefs.std_to_bool(saved(7));
-		  enable_r2 <= work.typedefs.std_to_bool(saved(6));
-		  enable_r1 <= work.typedefs.std_to_bool(saved(5));
-		  enable_w2 <= work.typedefs.std_to_bool(saved(1));
-		  enable_w1 <= work.typedefs.std_to_bool(saved(0));
---		  enable_w1 <= false;
+	     saved := to_bitvector(data);
+		  enable_r3 <= saved(7);
+		  enable_r2 <= saved(6);
+		  enable_r1 <= saved(5);
+		  enable_w2 <= saved(1);
+		  enable_w1 <= saved(0);
 	   elsif out_enable then
-	     data <= saved;
+	     data <= to_stdlogicvector(saved);
       else
 	     data <= (others => 'Z');
 		end if;
