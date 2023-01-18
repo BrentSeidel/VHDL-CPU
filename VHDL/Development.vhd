@@ -136,52 +136,29 @@ architecture rtl of Development is
 --
 --  Some constants
 --
-  constant max_reg : work.typedefs.byte := 24;  --  Number of assigned registers
+--  constant max_reg : work.typedefs.byte := 24;  --  Number of assigned registers
+  constant addr_alu   : natural := 0;
+  constant addr_count : natural := addr_alu + 5;
+  constant addr_cpu   : natural := addr_count + 2;
 begin
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');
   read_reg  <= (bMKR_A(1) = '1');
   --
-  --  Define some registers
+  --  Define an 8 bit ALU for test purposes.
   --
-  reg0 : entity work.Reg8
-    generic map(location => 0)
-    port map (data => bMKR_D(7 downto 0),
-	           out_enable => read_reg, set => write_reg, addr => addr_bus);
-  reg1 : entity work.Reg8
-    generic map(location => 1)
-    port map (data => bMKR_D(7 downto 0),
-	           out_enable => read_reg, set => write_reg, addr => addr_bus);
-  reg2 : entity work.Reg8
-    generic map(location => 2)
-    port map (data => bMKR_D(7 downto 0),
-	           out_enable => read_reg, set => write_reg, addr => addr_bus);
   alu8 : entity work.ALU8
-    generic map(location => 3)
+    generic map(location => addr_alu)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus);
   counter : entity work.Counter
-    generic map(location => 8)
+    generic map(location => addr_count)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
   cpu32 : entity work.CPU32
-    generic map(location => 10)
+    generic map(location => addr_cpu)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus);
-	--
-	--  Define values for unassigned addresses.  The value returned is simply
-	--  the address value.  Writes are ignored.
-	--
-	data_bus : process(read_reg, write_reg, addr_bus)
-	begin
-		if write_reg then
-			bMKR_D(7 downto 0) <= (others => 'Z');
-		elsif read_reg and (addr_bus > max_reg) then
-			bMKR_D(7 downto 0) <= work.typedefs.byte_to_vec(addr_bus);
-		else
-			bMKR_D(7 downto 0) <= (others => 'Z');
-		end if;
-	end process data_bus;
 
 	end rtl;
 

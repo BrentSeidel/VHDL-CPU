@@ -13,19 +13,19 @@ entity CPU is
   generic(count : integer; size : integer);
   port(r_addr1 : in natural range 0 to (2**count)-1;
 --     r_data1 : out std_logic_vector (1 downto 0);
-		 r_en1   : in bit;
+		 r_en1   : in std_logic;
 		 r_addr2 : in natural range 0 to (2**count)-1;
 --		 r_data2 : out std_logic_vector (size-1 downto 0);
-		 r_en2   : in bit;
+		 r_en2   : in std_logic;
 		 r_addr3 : in natural range 0 to (2**count)-1;
 		 r_data3 : out std_logic_vector (size-1 downto 0);
-		 r_en3   : in bit;
+		 r_en3   : in std_logic;
 --		 w_addr1 : in natural range 0 to (2**count)-1;
 --		 w_data1 : in std_logic_vector (size-1 downto 0);
-		 w_en1   : in bit;
+		 w_en1   : in std_logic;  --  Write data from ALU
 		 w_addr  : in natural range 0 to (2**count)-1;
 		 w_data  : in std_logic_vector (size-1 downto 0);
-		 w_en2   : in bit;
+		 w_en2   : in std_logic;  --  Write external data
 --     op1       : in std_logic_vector (size-1 downto 0);
 --     op2       : in std_logic_vector (size-1 downto 0);
        funct     : in work.typedefs.byte;

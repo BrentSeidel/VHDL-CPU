@@ -24,7 +24,7 @@ const int REG_READ  = 16;
 const int REG_NUM = 15;
 //
 //  ALU Registers
-const int ALU_BASE   = 3;
+const int ALU_BASE   = 0;
 const int ALU_OP1    = ALU_BASE;
 const int ALU_OP2    = ALU_BASE + 1;
 const int ALU_FUNC   = ALU_BASE + 2;
@@ -53,11 +53,11 @@ const int ALU_FLAG_ZERO  = 4;
 const int ALU_FLAG_ERROR = 8;
 //
 //  Counter registers
-const int COUNT_LSB = 8;
-const int COUNT_MSB = 9;
+const int COUNT_LSB = ALU_BASE + 5;
+const int COUNT_MSB = COUNT_LSB + 1;
 //
 //  CPU control registers
-const int CPU_BASE = 10;
+const int CPU_BASE = COUNT_LSB + 2;
 const int CPU_WDATA1  = CPU_BASE;
 const int CPU_WDATA2  = CPU_BASE + 1;
 const int CPU_WDATA3  = CPU_BASE + 2;
@@ -90,6 +90,8 @@ void test_flag(int expected);
 void print_flags(int flag);
 void cpu_write_reg(int data, int addr);
 int cpu_read_reg(int addr);
+void dump_cpu_reg();
+void cpu_operation(int reg1, int reg2, int reg3, int alu_op);
 
 void setup()
 {
@@ -206,22 +208,15 @@ void loop()
   {
     cpu_write_reg(x+0x100, x);
   }
-  cpu_write_reg(0x12345678, 0);
-  cpu_write_reg(0x87654321, 1);
-  cpu_write_reg(0xAAAAAAAA, 2);
-  cpu_write_reg(0x55555555, 3);
-  cpu_write_reg(0xDEADBEEF, 4);
-  cpu_write_reg(0xBEEFDEAD, 5);
-  cpu_write_reg(0xFFFFFFFF, 6);
-  cpu_write_reg(0x55555555, 7);
-  for (x = 0; x < 16; x++)
-  {
-    y = cpu_read_reg(x);
-    Serial.print("CPU register ");
-    Serial.print(x);
-    Serial.print(" is ");
-    Serial.println(y, HEX);
-  }
+  dump_cpu_reg();
+  //
+  //  Start CPU tests
+  Serial.println("Starting CPU tests.");
+  cpu_operation(0, 1, 2, ALU_OP_ADD);
+  cpu_operation(1, 0, 3, ALU_OP_SUB);
+  cpu_operation(0, 1, 4, ALU_OP_NOT);
+  dump_cpu_reg();
+  Serial.println("End of CPU tests.");
   while (1);
 }
 //
@@ -295,7 +290,7 @@ void test_alu(int op1, int op2, int func, int expected,
 //--    7     RO   Read data bits 31-24
 //--    8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
 //--    9    R/W   Raddr 3 (bits 7-4)
-//--   10    R/W   Waddr 1 (bits 7-4) Waddr 2 (bits 3-0)
+//--   10    R/W   Waddr   (bits 3-0)
 //--   11    R/W   ALU function
 //--   12    R/W   ALU flags
 //--   13    R/W   Enables
@@ -352,6 +347,37 @@ int cpu_read_reg(int addr)
   write_addr(CPU_ENABLES, 0);
   return temp;
 }
+
+void dump_cpu_reg()
+{
+  int x;
+  int y;
+
+  for (x = 0; x < 16; x++)
+  {
+    y = cpu_read_reg(x);
+    Serial.print("CPU register ");
+    Serial.print(x);
+    Serial.print(" is ");
+    Serial.println(y, HEX);
+  }
+}
+
+void cpu_operation(int reg1, int reg2, int reg3, int alu_op)
+{
+  write_addr(CPU_ENABLES, 0);
+  write_addr(CPU_WDATA1, 0);
+  write_addr(CPU_WDATA2, 0);
+  write_addr(CPU_WDATA3, 0);
+  write_addr(CPU_WDATA4, 0);
+  write_addr(CPU_RADDR12, ((reg1 & 0xF) << 4) | (reg2 & 0xF));
+  write_addr(CPU_WADDR12, reg3 & 0xF);
+  write_addr(CPU_FUNCT, alu_op);
+  write_addr(CPU_ENABLES, (1 << 6) | (1 << 5));
+  write_addr(CPU_ENABLES, 1);
+  write_addr(CPU_ENABLES, 0);
+}
+
 ///////////////////////////////////////////////////////
 //
 //  Define some functions to access the CPU-FPGA bus.

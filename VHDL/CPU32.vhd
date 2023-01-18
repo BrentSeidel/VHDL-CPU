@@ -60,12 +60,12 @@ architecture rtl of CPU32 is
   signal raddr1         : natural range 0 to (2**count)-1;
   signal raddr2         : natural range 0 to (2**count)-1;
   signal raddr3         : natural range 0 to (2**count)-1;
-  signal waddr         : natural range 0 to (2**count)-1;
-  signal enable_r1      : bit;
-  signal enable_r2      : bit;
-  signal enable_r3      : bit;
-  signal enable_w1      : bit;
-  signal enable_w2      : bit;
+  signal waddr          : natural range 0 to (2**count)-1;
+  signal enable_r1      : std_logic;
+  signal enable_r2      : std_logic;
+  signal enable_r3      : std_logic;
+  signal enable_w1      : std_logic;
+  signal enable_w2      : std_logic;
   signal func_value     : work.typedefs.byte;
   signal flags_pre      : work.typedefs.t_FLAGS;
   signal flags_post     : work.typedefs.t_FLAGS;
@@ -322,19 +322,20 @@ begin
   --  Register for enable bits
   --
   enable_reg : process(out_enable, set, addr, data)
---    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-    variable saved : bit_vector (7 downto 0) := (others => '0');
+    variable saved : std_logic_vector (7 downto 0) := (others => '0');
   begin
 	 if addr = enable_addr then
       if set then
-	     saved := to_bitvector(data);
+--	     saved := to_bitvector(data);
+        saved := data;
 		  enable_r3 <= saved(7);
 		  enable_r2 <= saved(6);
 		  enable_r1 <= saved(5);
 		  enable_w2 <= saved(1);
 		  enable_w1 <= saved(0);
 	   elsif out_enable then
-	     data <= to_stdlogicvector(saved);
+--	     data <= to_stdlogicvector(saved);
+	     data <= saved;
       else
 	     data <= (others => 'Z');
 		end if;
