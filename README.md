@@ -31,4 +31,6 @@ This is a list of things that I've learned.  These are the more major items that
 me stumped for a few days, not minor items.
 * If you want to use a function from a package, make sure that the function is listed in
 the package spec.  This should have been obvious to an Ada programer, but...
+* Sometimes you need to use edge triggering rather than level.  Note that this only works
+for std_logic and std_ulogic.
 

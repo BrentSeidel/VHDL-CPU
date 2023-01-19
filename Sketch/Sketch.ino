@@ -213,8 +213,10 @@ void loop()
   //  Start CPU tests
   Serial.println("Starting CPU tests.");
   cpu_operation(0, 1, 2, ALU_OP_ADD);
-  cpu_operation(1, 0, 3, ALU_OP_SUB);
+  cpu_operation(0, 5, 3, ALU_OP_SUB);
   cpu_operation(0, 1, 4, ALU_OP_NOT);
+  cpu_operation(15, 15, 15, ALU_OP_XOR);
+  cpu_operation(0, 1, 0, ALU_OP_ADD);
   dump_cpu_reg();
   Serial.println("End of CPU tests.");
   while (1);

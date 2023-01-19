@@ -245,7 +245,6 @@ set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name VHDL_FILE ALU8.vhd
 set_global_assignment -name SDC_FILE vidor_s.sdc
 set_global_assignment -name VHDL_FILE Development.vhd
-set_global_assignment -name VHDL_FILE Reg8.vhd
 set_global_assignment -name VHDL_FILE types.vhd
 set_global_assignment -name VHDL_FILE ALU.vhd
 set_global_assignment -name VHDL_FILE Counter.vhd
