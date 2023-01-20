@@ -9,6 +9,9 @@
    id="svg5"
    inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
    sodipodi:docname="CPU32.svg"
+   inkscape:export-filename="/Volumes/External - Data/Users/brent/Development/GitHub/VHDL-CPU/doc/CPU32.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +28,7 @@
      showgrid="true"
      inkscape:zoom="1.5554293"
      inkscape:cx="390.88887"
-     inkscape:cy="525.89983"
+     inkscape:cy="577.33257"
      inkscape:window-width="2059"
      inkscape:window-height="1276"
      inkscape:window-x="42"
@@ -407,14 +410,6 @@
        style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend-7)"
        d="m 113.77083,66.145837 c 0,29.104163 0,29.104163 0,29.104163"
        id="path22857-3" />
-    <g
-       id="g23004"
-       transform="translate(-101.91794,-66.145833)">
-      <path
-         style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend-3)"
-         d="m 103.1875,66.145832 c 0,29.104167 0,29.104167 0,29.104167"
-         id="path22857-5" />
-    </g>
     <g
        id="g2085"
        transform="translate(76.729167,-42.333327)">
