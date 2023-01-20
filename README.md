@@ -1,3 +1,4 @@
+
 # VHDL-CPU
 
 I've long had interest in designing and building a computer.
@@ -24,7 +25,8 @@ There are two main components in this repository:
 ## Documentation
 I'm starting to write some simple documentation.  Most of it should be linked from this
 section:
-* [Bus between CPU and FPGA](Bus.md)
+* [Bus between CPU and FPGA](doc/Bus.md)
+* [CPU Description](doc/CPU32.md)
 
 ## Lessons Learned
 This is a list of things that I've learned.  These are the more major items that have had
