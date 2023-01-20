@@ -2,7 +2,8 @@
 
 A block diagram of the current state of the CPU is below.  As should be
 obvious, it is far from finished.
-(CPU32.png)
+
+![CPU Diagram](./CPU32.png)
 
 This will probably never be a particularly high performance or sophisticated
 CPU.  I will declare victory once I get a basic set of instructions to
