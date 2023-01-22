@@ -326,7 +326,6 @@ begin
   begin
 	 if addr = enable_addr then
       if set then
---	     saved := to_bitvector(data);
         saved := data;
 		  enable_r3 <= saved(7);
 		  enable_r2 <= saved(6);
@@ -334,7 +333,6 @@ begin
 		  enable_w2 <= saved(1);
 		  enable_w1 <= saved(0);
 	   elsif out_enable then
---	     data <= to_stdlogicvector(saved);
 	     data <= saved;
       else
 	     data <= (others => 'Z');

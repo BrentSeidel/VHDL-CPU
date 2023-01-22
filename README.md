@@ -1,6 +1,5 @@
 
 # VHDL-CPU
-
 I've long had interest in designing and building a computer.
 At times this could be done by buying some components and plugging
 them together.  It's not quite the same though.  However using a
@@ -35,4 +34,6 @@ me stumped for a few days, not minor items.
 the package spec.  This should have been obvious to an Ada programer, but...
 * Sometimes you need to use edge triggering rather than level.  Note that this only works
 for std_logic and std_ulogic.
+* This one didn't stump me yet, but I was looking into data busses on FPGAs and it seems
+that bidirectional busses are not a good idea.
 
