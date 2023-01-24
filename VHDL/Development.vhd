@@ -133,10 +133,10 @@ architecture rtl of Development is
   signal addr_bus  : work.typedefs.byte;
   signal write_reg : boolean;
   signal read_reg  : boolean;
+  signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
 --
 --  Some constants
 --
---  constant max_reg : work.typedefs.byte := 24;  --  Number of assigned registers
   constant addr_alu   : natural := 0;
   constant addr_count : natural := addr_alu + 5;
   constant addr_cpu   : natural := addr_count + 2;
@@ -144,6 +144,7 @@ begin
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');
   read_reg  <= (bMKR_A(1) = '1');
+  slow_clock <= bMKR_A(2);
   --
   --  Define an 8 bit ALU for test purposes.
   --
@@ -158,7 +159,9 @@ begin
   cpu32 : entity work.CPU32
     generic map(location => addr_cpu)
 	 port map(data => bMKR_D(7 downto 0),
-	           out_enable => read_reg, set => write_reg, addr => addr_bus);
+	           out_enable => read_reg, set => write_reg, addr => addr_bus,
+--				  clock => iCLK);
+				  clock => slow_clock);
 
 	end rtl;
 

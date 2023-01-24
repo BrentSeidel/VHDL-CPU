@@ -17,8 +17,9 @@ const int ADDR_LSB = 8;
 const int ADDR_MSB = 14;
 //
 //  Control pins
-const int REG_WRITE = 15;
-const int REG_READ  = 16;
+const int REG_WRITE  = 15;
+const int REG_READ   = 16;
+const int SLOW_CLOCK = 17;
 //
 //  Number of registers to check
 const int REG_NUM = 15;
@@ -118,6 +119,10 @@ void setup()
   //  Set mode for control pins
   pinMode(REG_WRITE, OUTPUT);
   pinMode(REG_READ, OUTPUT);
+  pinMode(SLOW_CLOCK, OUTPUT);
+  digitalWrite(REG_WRITE, 0);
+  digitalWrite(REG_READ, 0);
+  digitalWrite(SLOW_CLOCK, 0);
 
   Serial.println("FPGA and MCU started.");
 }
@@ -389,7 +394,7 @@ int cpu_read_reg(int addr)
 
   write_addr(CPU_ENABLES, 0);
   write_addr(CPU_RADDR3, (addr & 0xF) << 4);
-  write_addr(CPU_ENABLES, 1 << 7);
+  write_addr(CPU_ENABLES, 1 << 2);
   temp = read_addr(CPU_RDATA1) & 0xFF;
   temp += (read_addr(CPU_RDATA2) & 0xFF) << 8;
   temp += (read_addr(CPU_RDATA3) & 0xFF) << 16;
@@ -427,6 +432,7 @@ void cpu_operation(int reg1, int reg2, int reg3, int alu_op)
 void test_cpu(int op1, int op2, int func, int expected,
   const char *name, int flg)
 {
+  int x;
   int y;
 
   tests++;
@@ -436,9 +442,17 @@ void test_cpu(int op1, int op2, int func, int expected,
   write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
   write_addr(CPU_WADDR12, 2 & 0xF);
   write_addr(CPU_FUNCT, func);
-  write_addr(CPU_ENABLES, (1 << 6) | (1 << 5));
   write_addr(CPU_ENABLES, 1);
-  write_addr(CPU_ENABLES, 0);
+//  Serial.println("Starting state machine");
+  for (x = 0; x < 3; x++)
+  {
+    digitalWrite(SLOW_CLOCK, 1);
+    digitalWrite(SLOW_CLOCK, 0);
+    write_addr(CPU_ENABLES, 0);
+//    y = read_addr(CPU_WADDR12);
+//    Serial.print("State ");
+//    Serial.println((y & 0xF0) >> 4);
+  }
 
   y = cpu_read_reg(2);
   if (y == expected)

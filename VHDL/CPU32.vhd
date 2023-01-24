@@ -35,7 +35,8 @@ entity CPU32 is
   port (data : inout std_logic_vector (7 downto 0);
         out_enable : in boolean;
 		  set : in boolean;
-		  addr : in work.typedefs.byte);
+		  addr : in work.typedefs.byte;
+		  clock : in std_logic);
 end entity CPU32;
 
 architecture rtl of CPU32 is
@@ -61,29 +62,29 @@ architecture rtl of CPU32 is
   signal raddr2         : natural range 0 to (2**count)-1;
   signal raddr3         : natural range 0 to (2**count)-1;
   signal waddr          : natural range 0 to (2**count)-1;
-  signal enable_r1      : std_logic;
-  signal enable_r2      : std_logic;
-  signal enable_r3      : std_logic;
-  signal enable_w1      : std_logic;
-  signal enable_w2      : std_logic;
+  signal start          : std_logic;
+  signal enable_read    : std_logic;
+  signal enable_write   : std_logic;
   signal func_value     : work.typedefs.byte;
   signal flags_pre      : work.typedefs.t_FLAGS;
   signal flags_post     : work.typedefs.t_FLAGS;
+  signal state          : std_logic_vector(3 downto 0);
 begin
 
   cpu : work.cpu
   generic map (count => count, size => size)
-  port map (r_addr1 => raddr1,  --  Read port 1
-		 r_en1     => enable_r1,
+  port map (
+       clock => clock,
+		 start => start,
+		 state => state,
+       r_addr1   => raddr1,     --  Read port 1
 		 r_addr2   => raddr2,     --  Read port 2
-		 r_en2     => enable_r2,
 		 r_addr3   => raddr3,     --  Read port 3
 		 r_data3   => read_bus,
-		 r_en3     => enable_r3,
-		 w_en1     => enable_w1,  --  Write port
+		 r_en3     => enable_read,
 		 w_addr    => waddr,
 		 w_data    => write_bus,
-		 w_en2     => enable_w2,
+		 w_en2     => enable_write,
        funct     => func_value, --  ALU Function
        flags_in  => flags_pre,  --  ALU Flags in
        flags_out => flags_post);  --  ALU Flags out
@@ -300,7 +301,7 @@ begin
     end if;
   end process raddr3_reg;
   --
-  --  Register for address w1 and w2
+  --  Register for write address.  Reading also returns sequencer state
   --
   waddr_reg : process(out_enable, set, addr, data)
     variable saved : std_logic_vector (7 downto 0) := (others => '0');
@@ -310,6 +311,7 @@ begin
 	     saved := data;
 		  waddr <= work.typedefs.vec_to_byte(saved(3 downto 0));
 	   elsif out_enable then
+		  saved(7 downto 4) := state;
 	     data <= saved;
       else
 	     data <= (others => 'Z');
@@ -327,11 +329,9 @@ begin
 	 if addr = enable_addr then
       if set then
         saved := data;
-		  enable_r3 <= saved(7);
-		  enable_r2 <= saved(6);
-		  enable_r1 <= saved(5);
-		  enable_w2 <= saved(1);
-		  enable_w1 <= saved(0);
+		  enable_read <= saved(2);
+		  enable_write <= saved(1);
+		  start <= saved(0);
 	   elsif out_enable then
 	     data <= saved;
       else
