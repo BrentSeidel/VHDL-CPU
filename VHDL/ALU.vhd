@@ -10,7 +10,7 @@ use ieee.numeric_std.all;
 --  Generic ALU entity
 --
 entity ALU is
-  generic (size : integer);
+  generic (size : natural);
   port (op1       : in std_logic_vector (size-1 downto 0);
         op2       : in std_logic_vector (size-1 downto 0);
         funct     : in work.typedefs.byte;
@@ -59,7 +59,6 @@ begin
         temp := t1 xor t2;
       when work.typedefs.ALU_OP_TST =>  --  Test op1 and set flags.  Op2 is ignored
         temp := t1;
-        temp(size) := '0';
       when work.typedefs.ALU_OP_NEG =>  --  Negative of op1.  Op2 is ignored
         temp := ZERO - t1;
         temp(size) := '0';

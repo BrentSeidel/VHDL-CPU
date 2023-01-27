@@ -26,6 +26,9 @@ architecture rtl of sequencer is
   signal state : states := state_null;
   signal next_state : states := state_null;
 begin
+  --
+  --  Transition states on the rising edge of a clock signal
+  --
   state_advance: process(clock)
     variable temp : work.typedefs.byte;
   begin
@@ -35,11 +38,13 @@ begin
 		current_state <= std_logic_vector(to_unsigned(temp, 4));
     end if;
   end process;
-
+  --
+  --  Compute what the next state should be and set output signals.
+  --
   state_machine: process(state, start)
   begin
     case state is
-	   when state_null =>
+	   when state_null =>  --  Wait for start signal to go high
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '0';
@@ -48,12 +53,12 @@ begin
 		  else
 			 next_state <= state_null;
 		  end if;
-		when state_read_op =>
+		when state_read_op =>  --  Read operands for the ALU
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
 		  enable_res <= '0';
 		  next_state <= state_write_res;
-		when state_write_res =>
+		when state_write_res =>  --  Write result from the ALU
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '1';
@@ -62,7 +67,7 @@ begin
 		  else
 		    next_state <= state_final;
 		  end if;
-		when state_final =>
+		when state_final =>  -- Wait for start signal to go low
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '0';

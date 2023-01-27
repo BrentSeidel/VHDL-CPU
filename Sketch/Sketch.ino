@@ -21,17 +21,6 @@ const int REG_WRITE  = 15;
 const int REG_READ   = 16;
 const int SLOW_CLOCK = 17;
 //
-//  Number of registers to check
-const int REG_NUM = 15;
-//
-//  ALU Registers
-const int ALU_BASE   = 0;
-const int ALU_OP1    = ALU_BASE;
-const int ALU_OP2    = ALU_BASE + 1;
-const int ALU_FUNC   = ALU_BASE + 2;
-const int ALU_FLAGS  = ALU_BASE + 3;
-const int ALU_RESULT = ALU_BASE + 4;
-//
 //  ALU Operations
 const int ALU_OP_NULL = 0;
 const int ALU_OP_ADD = 1;
@@ -54,7 +43,7 @@ const int ALU_FLAG_ZERO  = 4;
 const int ALU_FLAG_ERROR = 8;
 //
 //  Counter registers
-const int COUNT_LSB = ALU_BASE + 5;
+const int COUNT_LSB = 0;
 const int COUNT_MSB = COUNT_LSB + 1;
 //
 //  CPU control registers
@@ -85,14 +74,11 @@ void write_data(int data);
 int read_data();
 void write_addr(int addr, int data);
 int read_addr(int addr);
-void test_alu(int op1, int op2, int func, int expected,
-              const char *name, int flg);
-void test_flag(int expected);
+void test_cpu_flags(int expected);
 void print_flags(int flag);
 void cpu_write_reg(int data, int addr);
 int cpu_read_reg(int addr);
 void dump_cpu_reg();
-void cpu_operation(int reg1, int reg2, int reg3, int alu_op);
 void test_cpu(int op1, int op2, int func, int expected,
               const char *name, int flg);
 
@@ -133,66 +119,6 @@ void loop()
   int x;
   int y;
 
-  Serial.println("Testing ALU.");
-  write_addr(ALU_FLAGS, 0);
-  x = read_addr(ALU_FLAGS);
-  test_alu(31, 20, ALU_OP_ADD, 51, "31 ADD 20", 0);
-  test_alu(21, 40, ALU_OP_ADD, 61, "21 ADD 40", 0);
-  //
-  test_alu(31, 20, ALU_OP_SUB, 11, "31 SUB 20", 0);
-  test_alu(20, 31, ALU_OP_SUB, 245, "20 SUB 31", ALU_FLAG_SIGN +
-                                                 ALU_FLAG_CARRY);
-  //
-  test_alu(127, 0, ALU_OP_NOT, 128, "127 NOT", ALU_FLAG_SIGN);
-  test_alu(1, 123, ALU_OP_NOT, 254, "1 NOT", ALU_FLAG_SIGN);
-  //
-  test_alu(15, 13, ALU_OP_AND, 13, "15 AND 13", 0);
-  test_alu(16, 15, ALU_OP_AND, 0, "16 AND 15", ALU_FLAG_ZERO);
-  //
-  test_alu(16, 15, ALU_OP_OR, 31, "16 OR 15", 0);
-  test_alu(15, 13, ALU_OP_OR, 15, "15 OR 13", 0);
-  //
-  test_alu(5, 15, ALU_OP_XOR, 10, "5 XOR 15", 0);
-  test_alu(255, 254, ALU_OP_XOR, 1, "255 XOR 254", 0);
-  test_alu(123, 123, ALU_OP_XOR, 0, "123 XOR 123", ALU_FLAG_ZERO);
-  //
-  test_alu(255, 0, ALU_OP_TST, 255, "255 TST", ALU_FLAG_SIGN);
-  test_alu(128, 0, ALU_OP_TST, 128, "128 TST", ALU_FLAG_SIGN);
-  test_alu(127, 0, ALU_OP_TST, 127, "127 TST", 0);
-  test_alu(0, 255, ALU_OP_TST, 0, "0 TST", ALU_FLAG_ZERO);
-  //
-  test_alu(255, 0, ALU_OP_NEG, 1, "255 NEG", 0);
-  test_alu(127, 255, ALU_OP_NEG, 129, "127 NEG", ALU_FLAG_SIGN);
-  //
-  test_alu(100, 10, ALU_OP_ADC, 110, "100 ADC 10", 0);
-  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
-  test_alu(100, 10, ALU_OP_ADC, 111, "100 ADC 10", 0);
-  //
-  write_addr(ALU_FLAGS, 0);
-  test_alu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
-  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
-  test_alu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
-  //
-  test_alu(1, 0, ALU_OP_SHL, 1, "1 SHL 0", 0);
-  test_alu(1, 1, ALU_OP_SHL, 2, "1 SHL 1", 0);
-  test_alu(1, 3, ALU_OP_SHL, 8, "1 SHL 3", 0);
-  test_alu(1, 7, ALU_OP_SHL, 128, "1 SHL 7", ALU_FLAG_SIGN);
-  test_alu(1, 8, ALU_OP_SHL, 0, "1 SHL 8", ALU_FLAG_ZERO +
-                                           ALU_FLAG_CARRY);
-  //
-  test_alu(128, 0, ALU_OP_SHR, 128, "128 SHR 0", ALU_FLAG_SIGN);
-  test_alu(128, 1, ALU_OP_SHR, 64, "128 SHR 1", 0);
-  test_alu(128, 3, ALU_OP_SHR, 16, "128 SHR 3", 0);
-  test_alu(128, 7, ALU_OP_SHR, 1, "128 SHR 7", 0);
-  test_alu(128, 8, ALU_OP_SHR, 0, "128 SHR 8", ALU_FLAG_ZERO);
-  //
-  Serial.println();
-  Serial.print(tests);
-  Serial.print(" tests, ");
-  Serial.print(passes);
-  Serial.print(" passed, ");
-  Serial.print(fails);
-  Serial.println(" failed");
   //
   //  Show some counter values
   x = read_addr(COUNT_LSB);
@@ -208,11 +134,12 @@ void loop()
   write_addr(CPU_FUNCT, 0);
   write_addr(CPU_ENABLES, 0);
   write_addr(CPU_WADDR12, 0);
+  write_addr(CPU_FLAGS, 0);
   //
   //  Test CPU registers
   for (x = 0; x < 16; x++)
   {
-    cpu_write_reg(x+0x100, x);
+    cpu_write_reg(x+0xFF00, x);
   }
   dump_cpu_reg();
   //
@@ -220,6 +147,8 @@ void loop()
   Serial.println("Starting CPU tests.");
   test_cpu(31, 20, ALU_OP_ADD, 51, "31 ADD 20", 0);
   test_cpu(21, 40, ALU_OP_ADD, 61, "21 ADD 40", 0);
+  test_cpu(0xFFFF, 1, ALU_OP_ADD, 0x10000, "FFFF ADD 1", 0);
+  test_cpu(0x7FFF, 1, ALU_OP_ADD, 0x8000, "7FFF ADD 1", 0);
   //
   test_cpu(31, 20, ALU_OP_SUB, 11, "31 SUB 20", 0);
   test_cpu(20, 31, ALU_OP_SUB, -11, "20 SUB 31", ALU_FLAG_SIGN +
@@ -238,28 +167,65 @@ void loop()
   test_cpu(255, 254, ALU_OP_XOR, 1, "255 XOR 254", 0);
   test_cpu(123, 123, ALU_OP_XOR, 0, "123 XOR 123", ALU_FLAG_ZERO);
   //
-  test_cpu(255, 0, ALU_OP_TST, 255, "255 TST", ALU_FLAG_SIGN);
-  test_cpu(128, 0, ALU_OP_TST, 128, "128 TST", ALU_FLAG_SIGN);
+  test_cpu(0, 0, ALU_OP_TST, 0, "0 TST", ALU_FLAG_ZERO);
+  test_cpu(1, 0, ALU_OP_TST, 1, "1 TST", 0);
+  test_cpu(2, 0, ALU_OP_TST, 2, "2 TST", 0);
+  test_cpu(4, 0, ALU_OP_TST, 4, "4 TST", 0);
+  test_cpu(8, 0, ALU_OP_TST, 8, "8 TST", 0);
+  test_cpu(16, 0, ALU_OP_TST, 16, "16 TST", 0);
+  test_cpu(32, 0, ALU_OP_TST, 32, "32 TST", 0);
+  test_cpu(64, 0, ALU_OP_TST, 64, "64 TST", 0);
+  test_cpu(128, 0, ALU_OP_TST, 128, "128 TST", 0);
+  test_cpu(0x100, 0, ALU_OP_TST, 0x100, "0x100 TST", 0);
+  test_cpu(0x200, 0, ALU_OP_TST, 0x200, "0x200 TST", 0);
+  test_cpu(0x400, 0, ALU_OP_TST, 0x400, "0x400 TST", 0);
+  test_cpu(0x800, 0, ALU_OP_TST, 0x800, "0x800 TST", 0);
+  test_cpu(0x1000, 0, ALU_OP_TST, 0x1000, "0x1000 TST", 0);
+  test_cpu(0x2000, 0, ALU_OP_TST, 0x2000, "0x2000 TST", 0);
+  test_cpu(0x4000, 0, ALU_OP_TST, 0x4000, "0x4000 TST", 0);
+  test_cpu(0x8000, 0, ALU_OP_TST, 0x8000, "0x8000 TST", 0);
+  test_cpu(0x10000, 0, ALU_OP_TST, 0x10000, "0x10000 TST", 0);
+  test_cpu(0x20000, 0, ALU_OP_TST, 0x20000, "0x20000 TST", 0);
+  test_cpu(0x40000, 0, ALU_OP_TST, 0x40000, "0x40000 TST", 0);
+  test_cpu(0x80000, 0, ALU_OP_TST, 0x80000, "0x80000 TST", 0);
+  test_cpu(0x100000, 0, ALU_OP_TST, 0x100000, "0x100000 TST", 0);
+  test_cpu(0x200000, 0, ALU_OP_TST, 0x200000, "0x200000 TST", 0);
+  test_cpu(0x400000, 0, ALU_OP_TST, 0x400000, "0x400000 TST", 0);
+  test_cpu(0x800000, 0, ALU_OP_TST, 0x800000, "0x800000 TST", 0);
+  test_cpu(0x1000000, 0, ALU_OP_TST, 0x1000000, "0x1000000 TST", 0);
+  test_cpu(0x2000000, 0, ALU_OP_TST, 0x2000000, "0x2000000 TST", 0);
+  test_cpu(0x4000000, 0, ALU_OP_TST, 0x4000000, "0x4000000 TST", 0);
+  test_cpu(0x8000000, 0, ALU_OP_TST, 0x8000000, "0x8000000 TST", 0);
+  test_cpu(0x10000000, 0, ALU_OP_TST, 0x10000000, "0x10000000 TST", 0);
+  test_cpu(0x20000000, 0, ALU_OP_TST, 0x20000000, "0x20000000 TST", 0);
+  test_cpu(0x40000000, 0, ALU_OP_TST, 0x40000000, "0x40000000 TST", 0);
+  test_cpu(0x80000000, 0, ALU_OP_TST, 0x80000000, "0x80000000 TST", ALU_FLAG_SIGN);
+  test_cpu(0xFFFFFFFF, 0, ALU_OP_TST, 0xFFFFFFFF, "0xFFFFFFFF TST", ALU_FLAG_SIGN);
+  test_cpu(255, 0, ALU_OP_TST, 255, "255 TST", 0);
   test_cpu(127, 0, ALU_OP_TST, 127, "127 TST", 0);
   test_cpu(0, 255, ALU_OP_TST, 0, "0 TST", ALU_FLAG_ZERO);
+  test_cpu(0xFFFF, 0, ALU_OP_TST, 0xFFFF, "0xFFFF TST", 0);
+  test_cpu(0x80000000, 0, ALU_OP_TST, 0x80000000, "128 TST", ALU_FLAG_SIGN);
+  test_cpu(0xFFFFFFFF, 0, ALU_OP_TST, 0xFFFFFFFF, "0xFFFFFFFF TST", ALU_FLAG_SIGN);
   //
-  test_cpu(255, 0, ALU_OP_NEG, -255, "255 NEG", 0);
+  test_cpu(255, 0, ALU_OP_NEG, -255, "255 NEG", ALU_FLAG_SIGN);
   test_cpu(127, 255, ALU_OP_NEG, -127, "127 NEG", ALU_FLAG_SIGN);
+  test_cpu(-127, 255, ALU_OP_NEG, 127, "-127 NEG", 0);
   //
-//  test_alu(100, 10, ALU_OP_ADC, 110, "100 ADC 10", 0);
-//  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
-//  test_alu(100, 10, ALU_OP_ADC, 111, "100 ADC 10", 0);
+  test_cpu(100, 10, ALU_OP_ADC, 110, "100 ADC 10", 0);
+  write_addr(CPU_FLAGS, ALU_FLAG_CARRY);
+  test_cpu(100, 10, ALU_OP_ADC, 111, "100 ADC 10", 0);
   //
-//  write_addr(ALU_FLAGS, 0);
-//  test_alu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
-//  write_addr(ALU_FLAGS, ALU_FLAG_CARRY);
-//  test_alu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
+  write_addr(CPU_FLAGS, 0);
+  test_cpu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
+  write_addr(CPU_FLAGS, ALU_FLAG_CARRY);
+  test_cpu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
   //
   test_cpu(1, 0, ALU_OP_SHL, 1, "1 SHL 0", 0);
   test_cpu(1, 1, ALU_OP_SHL, 2, "1 SHL 1", 0);
   test_cpu(1, 3, ALU_OP_SHL, 8, "1 SHL 3", 0);
-  test_cpu(1, 7, ALU_OP_SHL, 128, "1 SHL 7", ALU_FLAG_SIGN);
-  test_cpu(1, 8, ALU_OP_SHL, 256, "1 SHL 8", ALU_FLAG_ZERO +
+  test_cpu(1, 31, ALU_OP_SHL, 0x80000000, "1 SHL 31", ALU_FLAG_SIGN);
+  test_cpu(1, 32, ALU_OP_SHL, 0, "1 SHL 32", ALU_FLAG_ZERO +
                                            ALU_FLAG_CARRY);
   //
   test_cpu(128, 0, ALU_OP_SHR, 128, "128 SHR 0", ALU_FLAG_SIGN);
@@ -281,27 +247,6 @@ void loop()
 //
 //  Define some test functions
 //
-void test_flag(int expected)
-{
-  int y;
-
-  tests++;
-  y = read_addr(ALU_FLAGS);
-  if (y == expected)
-  {
-    Serial.println("Passed");
-    passes++;
-  }
-  else
-  {
-    fails++;
-    Serial.print("** FAILED ** Expected ");
-    Serial.print(expected, HEX);
-    Serial.print(" got ");
-    Serial.println(y, HEX);
-  }
-}
-
 void print_flags(int flag)
 {
   Serial.println((flag & ALU_FLAG_CARRY) ? "Carry" : "No Carry");
@@ -309,35 +254,7 @@ void print_flags(int flag)
   Serial.println((flag & ALU_FLAG_ZERO) ? "Zero" : "No Zero");
   Serial.println((flag & ALU_FLAG_ERROR) ? "Error" : "No Error");
 }
-
-void test_alu(int op1, int op2, int func, int expected,
-  const char *name, int flg)
-{
-  int y;
-
-  tests++;
-  write_addr(ALU_OP1, op1);
-  write_addr(ALU_OP2, op2);
-  write_addr(ALU_FUNC, func);
-  y = read_addr(ALU_RESULT);
-  if (y == expected)
-  {
-    Serial.print(name);
-    Serial.print(" passed");
-    passes++;
-  }
-  else
-  {
-    fails++;
-    Serial.print(name);
-    Serial.print(" FAILED - expected ");
-    Serial.print(expected);
-    Serial.print(", got ");
-    Serial.print(y);
-  }
-  Serial.print(", Flags ");
-  test_flag(flg);
-}
+//
 //--  Base+  Type  Use
 //--    0    R/W   Write data bits 7-0
 //--    1    R/W   Write data bits 15-8
@@ -418,15 +335,25 @@ void dump_cpu_reg()
   }
 }
 
-void cpu_operation(int reg1, int reg2, int reg3, int alu_op)
+void test_cpu_flags(int expected)
 {
-  write_addr(CPU_ENABLES, 0);
-  write_addr(CPU_RADDR12, ((reg1 & 0xF) << 4) | (reg2 & 0xF));
-  write_addr(CPU_WADDR12, reg3 & 0xF);
-  write_addr(CPU_FUNCT, alu_op);
-  write_addr(CPU_ENABLES, (1 << 6) | (1 << 5));
-  write_addr(CPU_ENABLES, 1);
-  write_addr(CPU_ENABLES, 0);
+  int y;
+
+  tests++;
+  y = read_addr(CPU_FLAGS);
+  if (y == expected)
+  {
+    Serial.println("Passed");
+    passes++;
+  }
+  else
+  {
+    fails++;
+    Serial.print("** FAILED ** Expected ");
+    Serial.print(expected, HEX);
+    Serial.print(" got ");
+    Serial.println(y, HEX);
+  }
 }
 
 void test_cpu(int op1, int op2, int func, int expected,
@@ -469,10 +396,12 @@ void test_cpu(int op1, int op2, int func, int expected,
     Serial.print(expected);
     Serial.print(", got ");
     Serial.print(y);
+    Serial.print(" (");
+    Serial.print(y, HEX);
+    Serial.print(")");
   }
-//  Serial.print(", Flags ");
-//  test_flag(flg);
-  Serial.println();
+  Serial.print(", Flags ");
+  test_cpu_flags(flg);
 }
 
 ///////////////////////////////////////////////////////

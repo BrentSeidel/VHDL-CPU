@@ -20,15 +20,13 @@ use ieee.std_logic_unsigned.all ;
 --    7     RO   Read data bits 31-24
 --    8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
 --    9    R/W   Raddr 3 (bits 7-4)
---   10    R/W   Waddr 1 (bits 7-4) Waddr 2 (bits 3-0)
+--   10    R/W   Waddr (bits 3-0)
 --   11    R/W   ALU function
 --   12    R/W   ALU flags
 --   13    R/W   Enables
---                 7 - Renable 3
---                 6 - Renable 2
---                 5 - Renable 1
---                 1 - Wenable 2
---                 0 - Wenable 1
+--                 2 - Enable read
+--                 1 - Enable write
+--                 0 - Start state machine
 --
 entity CPU32 is
   generic (location : work.typedefs.byte);
@@ -69,8 +67,8 @@ architecture rtl of CPU32 is
   signal flags_pre      : work.typedefs.t_FLAGS;
   signal flags_post     : work.typedefs.t_FLAGS;
   signal state          : std_logic_vector(3 downto 0);
-begin
 
+begin
   cpu : work.cpu
   generic map (count => count, size => size)
   port map (
@@ -187,7 +185,7 @@ begin
   --  Register for flags.  Not really a register, though it looks like one.
   --  It writes flags to the ALU and reads flags from the ALU.
   --
-  flag_reg : process(out_enable, set, addr, data)
+  flag_reg : process(out_enable, set, addr, data, flags_post)
   begin
 	 if addr = flag_addr then
       if set then
@@ -204,7 +202,7 @@ begin
   --
   --  Register for read data 1.
   --
-  rdata1_reg : process(out_enable, set, addr, data)
+  rdata1_reg : process(out_enable, set, addr, data, read_bus)
   begin
 	 if addr = Rdata1_addr then
 	   if (not set) and out_enable then
@@ -219,7 +217,7 @@ begin
   --
   --  Register for read data 2.
   --
-  rdata2_reg : process(out_enable, set, addr, data)
+  rdata2_reg : process(out_enable, set, addr, data, read_bus)
   begin
 	 if addr = Rdata2_addr then
 	   if (not set) and out_enable then
@@ -234,7 +232,7 @@ begin
   --
   --  Register for read data 3.
   --
-  rdata3_reg : process(out_enable, set, addr, data)
+  rdata3_reg : process(out_enable, set, addr, data, read_bus)
   begin
 	 if addr = Rdata3_addr then
 	   if (not set) and out_enable then
@@ -249,7 +247,7 @@ begin
   --
   --  Register for read data 4.
   --
-  rdata4_reg : process(out_enable, set, addr, data)
+  rdata4_reg : process(out_enable, set, addr, data, read_bus)
   begin
 	 if addr = Rdata4_addr then
 	   if (not set) and out_enable then
@@ -303,7 +301,7 @@ begin
   --
   --  Register for write address.  Reading also returns sequencer state
   --
-  waddr_reg : process(out_enable, set, addr, data)
+  waddr_reg : process(out_enable, set, addr, data, state)
     variable saved : std_logic_vector (7 downto 0) := (others => '0');
   begin
 	 if addr = Waddr_addr then

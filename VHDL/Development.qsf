@@ -242,7 +242,6 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name GENERATE_TTF_FILE ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name VHDL_FILE ALU8.vhd
 set_global_assignment -name SDC_FILE vidor_s.sdc
 set_global_assignment -name VHDL_FILE Development.vhd
 set_global_assignment -name VHDL_FILE types.vhd
