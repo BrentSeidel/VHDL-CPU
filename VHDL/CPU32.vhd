@@ -87,178 +87,70 @@ begin
        flags_in  => flags_pre,  --  ALU Flags in
        flags_out => flags_post);  --  ALU Flags out
   --
-  --  Register for write data 1
+  --  Register for general data registers
   --
-  wdata1_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
+  general_reg : process(out_enable, set, addr, data, write_bus)
   begin
-	 if addr = Wdata1_addr then
-      if set then
-	     saved := data;
-		  write_bus(7 downto 0) <= data;
-	   elsif out_enable then
-	     data <= saved;
-      else
+    case addr is
+	   when Wdata1_addr =>  --  Write data 1
+        if set then
+	       write_bus(7 downto 0) <= data;
+	     elsif out_enable then
+	       data <= write_bus(7 downto 0);
+		  end if;
+	   when Wdata2_addr =>  --  Write data 2
+        if set then
+	       write_bus(15 downto 8) <= data;
+	     elsif out_enable then
+	       data <= write_bus(15 downto 8);
+		  end if;
+	   when Wdata3_addr =>  --  Write data 3
+        if set then
+	       write_bus(23 downto 16) <= data;
+	     elsif out_enable then
+	       data <= write_bus(23 downto 16);
+		  end if;
+	   when Wdata4_addr =>  --  Write data 4
+        if set then
+	       write_bus(31 downto 24) <= data;
+	     elsif out_enable then
+	       data <= write_bus(31 downto 24);
+		  end if;
+		when funct_addr =>  --  ALU function
+        if set then
+		    func_value <= work.typedefs.vec_to_byte(data);
+	     elsif out_enable then
+	       data <= work.typedefs.byte_to_vec(func_value);
+		  end if;
+		when flag_addr =>  --  ALU flags
+        if set then
+		    flags_pre <= work.typedefs.vec_to_flags(data);
+	     elsif out_enable then
+	       data <= work.typedefs.flags_to_vec(flags_post);
+		  end if;
+		when Rdata1_addr =>  --  Read data 1
+	     if (not set) and out_enable then
+	       data <= read_bus(7 downto 0);
+		  end if;
+		when Rdata2_addr =>  --  Read data 2
+	     if (not set) and out_enable then
+	       data <= read_bus(15 downto 8);
+		  end if;
+		when Rdata3_addr =>  --  Read data 3
+	     if (not set) and out_enable then
+	       data <= read_bus(23 downto 16);
+		  end if;
+		when Rdata4_addr =>  --  Read data 4
+	     if (not set) and out_enable then
+	       data <= read_bus(31 downto 24);
+		  end if;
+      when others =>
 	     data <= (others => 'Z');
-		end if;
-	 else
+    end case;		
+	 if (not set) and (not out_enable) then
       data <= (others => 'Z');
-    end if;
-  end process wdata1_reg;
-  --
-  --  Register for write data 2
-  --
-  wdata2_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Wdata2_addr then
-      if set then
-	     saved := data;
-		  write_bus(15 downto 8) <= data;
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process wdata2_reg;
-  --
-  --  Register for write data 3
-  --
-  wdata3_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Wdata3_addr then
-      if set then
-	     saved := data;
-		  write_bus(23 downto 16) <= data;
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process wdata3_reg;
-  --
-  --  Register for write data 4
-  --
-  wdata4_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Wdata4_addr then
-      if set then
-	     saved := data;
-		  write_bus(31 downto 24) <= data;
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process wdata4_reg;
-  --
-  --  Register for ALU function
-  --
-  func_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = funct_addr then
-      if set then
-	     saved := data;
-		  func_value <= work.typedefs.vec_to_byte(data);
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process func_reg;
-  --
-  --  Register for flags.  Not really a register, though it looks like one.
-  --  It writes flags to the ALU and reads flags from the ALU.
-  --
-  flag_reg : process(out_enable, set, addr, data, flags_post)
-  begin
-	 if addr = flag_addr then
-      if set then
-		  flags_pre <= work.typedefs.vec_to_flags(data);
-	   elsif out_enable then
-	     data <= work.typedefs.flags_to_vec(flags_post);
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-	   data <= (others => 'Z');
-    end if;
-  end process flag_reg;
-  --
-  --  Register for read data 1.
-  --
-  rdata1_reg : process(out_enable, set, addr, data, read_bus)
-  begin
-	 if addr = Rdata1_addr then
-	   if (not set) and out_enable then
-	     data <= read_bus(7 downto 0);
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process rdata1_reg;
-  --
-  --  Register for read data 2.
-  --
-  rdata2_reg : process(out_enable, set, addr, data, read_bus)
-  begin
-	 if addr = Rdata2_addr then
-	   if (not set) and out_enable then
-	     data <= read_bus(15 downto 8);
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process rdata2_reg;
-  --
-  --  Register for read data 3.
-  --
-  rdata3_reg : process(out_enable, set, addr, data, read_bus)
-  begin
-	 if addr = Rdata3_addr then
-	   if (not set) and out_enable then
-	     data <= read_bus(23 downto 16);
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process rdata3_reg;
-  --
-  --  Register for read data 4.
-  --
-  rdata4_reg : process(out_enable, set, addr, data, read_bus)
-  begin
-	 if addr = Rdata4_addr then
-	   if (not set) and out_enable then
-	     data <= read_bus(31 downto 24);
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process rdata4_reg;
+	 end if;
+  end process general_reg;
   --
   --  Register for address r1 and r2
   --

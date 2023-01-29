@@ -138,7 +138,7 @@ architecture rtl of Development is
 --  Some constants for register base addresses
 --
   constant addr_count : natural := 0;
-  constant addr_cpu   : natural := addr_count + 2;
+  constant addr_cpu   : natural := addr_count + 2 + 15;
 begin
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');

@@ -46,8 +46,35 @@ const int ALU_FLAG_ERROR = 8;
 const int COUNT_LSB = 0;
 const int COUNT_MSB = COUNT_LSB + 1;
 //
+//  There is an odd issue where data being written to the register file
+//  from the ALU doesn't match the expected result.  The exact error also
+//  seems to depend on the base address of the CPU registers.  The table
+//  below is a list of offsets and resluts of TST 0xFFFFFFFF (all 1s).
+//  count_lsb+2+  TST 0xFFFFFF
+//       0        0x231009C5
+//       1        0x00000200
+//       2        0xE3010080
+//       3        0x2001606B
+//       4        0x8E26CF82
+//       5        0xEE01C0FF
+//       6        0x08282000
+//       7        0xE0012002
+//       8        0x00080000
+//       9        0x10000000
+//      10        0xE620F242
+//      11        0x397EA00E
+//      12        0xA01C4B04
+//      13        0x02000400
+//      14        0xEBFF6BFE
+//      15        0xFFFFFFFF
+//      16        0x
+//      17        0x
+//      18        0x
+//      19        0x
+//      20        0x
+//
 //  CPU control registers
-const int CPU_BASE    = COUNT_LSB + 2;
+const int CPU_BASE    = COUNT_LSB + 2 + 15;
 const int CPU_WDATA1  = CPU_BASE;
 const int CPU_WDATA2  = CPU_BASE + 1;
 const int CPU_WDATA3  = CPU_BASE + 2;
@@ -226,7 +253,7 @@ void loop()
   test_cpu(1, 3, ALU_OP_SHL, 8, "1 SHL 3", 0);
   test_cpu(1, 31, ALU_OP_SHL, 0x80000000, "1 SHL 31", ALU_FLAG_SIGN);
   test_cpu(1, 32, ALU_OP_SHL, 0, "1 SHL 32", ALU_FLAG_ZERO +
-                                           ALU_FLAG_CARRY);
+                                               ALU_FLAG_CARRY);
   //
   test_cpu(128, 0, ALU_OP_SHR, 128, "128 SHR 0", ALU_FLAG_SIGN);
   test_cpu(128, 1, ALU_OP_SHR, 64, "128 SHR 1", 0);

@@ -59,6 +59,7 @@ begin
         temp := t1 xor t2;
       when work.typedefs.ALU_OP_TST =>  --  Test op1 and set flags.  Op2 is ignored
         temp := t1;
+--		  temp := (others => '1');
       when work.typedefs.ALU_OP_NEG =>  --  Negative of op1.  Op2 is ignored
         temp := ZERO - t1;
         temp(size) := '0';
@@ -78,5 +79,6 @@ begin
       flags_out.zero <= '0';
     end if;
     result <= temp(size-1 downto 0);
+--    result <= (others => '1');
   end process store;
 end rtl;

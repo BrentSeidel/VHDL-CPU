@@ -45,9 +45,9 @@ begin
              enable_res => enable_res,
 				 current_state => state);
 
-  multiplexor : work.mux
+  multiplexor : work.multiplexor2
     generic map(size => size)
-	 port map(selector => (enable_res = '1'),
+	 port map(selector => enable_res,
 	          inp1 => res,
 				 inp2 => w_data,
 				 out1 => reg);
