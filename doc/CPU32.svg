@@ -28,9 +28,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="true"
-     inkscape:zoom="2.1997092"
-     inkscape:cx="217.30145"
-     inkscape:cy="399.59827"
+     inkscape:zoom="1.5554293"
+     inkscape:cx="295.09538"
+     inkscape:cy="507.25546"
      inkscape:window-width="1898"
      inkscape:window-height="1024"
      inkscape:window-x="0"
@@ -77,7 +77,7 @@
        inkscape:isstock="true"
        viewBox="0 0 17.773854 10.156488"
        markerWidth="17.773853"
-       markerHeight="10.156488"
+       markerHeight="10.156487"
        preserveAspectRatio="xMidYMid">
       <path
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
@@ -92,7 +92,11 @@
        refY="0"
        orient="auto"
        inkscape:stockid="Arrow1Lend"
-       inkscape:isstock="true">
+       inkscape:isstock="true"
+       viewBox="0 0 17.773854 10.156488"
+       markerWidth="17.773853"
+       markerHeight="10.156488"
+       preserveAspectRatio="xMidYMid">
       <path
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
          style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
@@ -190,7 +194,11 @@
        refY="0"
        orient="auto"
        inkscape:stockid="Arrow1Lend"
-       inkscape:isstock="true">
+       inkscape:isstock="true"
+       viewBox="0 0 17.773854 10.156488"
+       markerWidth="17.773853"
+       markerHeight="10.156488"
+       preserveAspectRatio="xMidYMid">
       <path
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
          style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
@@ -207,7 +215,7 @@
        inkscape:isstock="true"
        viewBox="0 0 17.773854 10.156488"
        markerWidth="17.773853"
-       markerHeight="10.156488"
+       markerHeight="10.156487"
        preserveAspectRatio="xMidYMid">
       <path
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
@@ -222,7 +230,11 @@
        refY="0"
        orient="auto"
        inkscape:stockid="Arrow1Lend"
-       inkscape:isstock="true">
+       inkscape:isstock="true"
+       viewBox="0 0 17.773854 10.156488"
+       markerWidth="17.773853"
+       markerHeight="10.156488"
+       preserveAspectRatio="xMidYMid">
       <path
          transform="matrix(-0.8,0,0,-0.8,-10,0)"
          style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
@@ -449,6 +461,14 @@
          y="197.49271">Result</tspan></text>
     <text
        xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="53.215454"
+       y="110.35633"
+       id="text6607-0"><tspan
+         sodipodi:role="line"
+         id="tspan2399">write_mux_sel</tspan></text>
+    <text
+       xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
        x="114.93729"
        y="141.32599"
@@ -491,11 +511,6 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.175px;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583"
          x="90.215759"
          y="121.53668">Wdata</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
-       d="m 82.010514,90.010088 0.01032,29.052412"
-       id="path22857"
-       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend-0)"
        d="M 150.8125,61.553054 V 95.25"
@@ -726,6 +741,10 @@
        style="opacity:1;fill:#818181;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#Arrow1Lend-7-1)"
        d="m 31.513634,93.698937 c -23.6953659,0 -23.6953659,0 -23.6953659,0"
        id="path1853" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.25;stroke-dasharray:none;marker-end:url(#Arrow1Lend)"
+       d="m 52.923662,98.149335 v 12.990355 l 28.626889,-0.24056 v 7.93855"
+       id="path338" />
   </g>
   <metadata
      id="metadata395">

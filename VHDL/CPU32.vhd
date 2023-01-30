@@ -89,7 +89,9 @@ begin
   --
   --  Register for general data registers
   --
-  general_reg : process(out_enable, set, addr, data, write_bus)
+  general_reg : process(out_enable, set, addr, data, write_bus,
+    read_bus, func_value, flags_post, raddr1, raddr2, raddr3,
+	 state, waddr, enable_read, enable_write, start)
   begin
     case addr is
 	   when Wdata1_addr =>  --  Write data 1
@@ -144,6 +146,35 @@ begin
 	     if (not set) and out_enable then
 	       data <= read_bus(31 downto 24);
 		  end if;
+		when Raddr12_addr =>  --  Read register addresses 1 & 2
+        if set then
+	       raddr1 <= work.typedefs.vec_to_byte(data(7 downto 4));
+		    raddr2 <= work.typedefs.vec_to_byte(data(3 downto 0));
+	     elsif out_enable then
+		    data(7 downto 4) <= work.typedefs.byte_to_vec(raddr1)(3 downto 0);
+		    data(3 downto 0) <= work.typedefs.byte_to_vec(raddr2)(3 downto 0);
+		  end if;
+		when Raddr3_addr =>  --  Read register address 3
+        if set then
+		    raddr3 <= work.typedefs.vec_to_byte(data(7 downto 4));
+	     elsif out_enable then
+	       data <= work.typedefs.byte_to_vec(raddr3);
+		  end if;
+		when Waddr_addr =>  --  Write register address
+        if set then
+		    waddr <= work.typedefs.vec_to_byte(data(3 downto 0));
+	     elsif out_enable then
+		    data(7 downto 4) <= state;
+	       data(3 downto 0) <= work.typedefs.byte_to_vec(waddr)(3 downto 0);
+		  end if;
+		when enable_addr =>  --  Enable/control bits
+        if set then
+		    enable_read <= data(2);
+		    enable_write <= data(1);
+		    start <= data(0);
+	     elsif out_enable then
+		    data <= (0 => start, 1 => enable_write, 2 => enable_read, others => '0');
+		  end if;
       when others =>
 	     data <= (others => 'Z');
     end case;		
@@ -151,86 +182,6 @@ begin
       data <= (others => 'Z');
 	 end if;
   end process general_reg;
-  --
-  --  Register for address r1 and r2
-  --
-  raddr12_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Raddr12_addr then
-      if set then
-	     saved := data;
-		  raddr1 <= work.typedefs.vec_to_byte(saved(7 downto 4));
-		  raddr2 <= work.typedefs.vec_to_byte(saved(3 downto 0));
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process raddr12_reg;
-  --
-  --  Register for address r3
-  --
-  raddr3_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Raddr3_addr then
-      if set then
-	     saved := data;
-		  raddr3 <= work.typedefs.vec_to_byte(saved(7 downto 4));
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process raddr3_reg;
-  --
-  --  Register for write address.  Reading also returns sequencer state
-  --
-  waddr_reg : process(out_enable, set, addr, data, state)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = Waddr_addr then
-      if set then
-	     saved := data;
-		  waddr <= work.typedefs.vec_to_byte(saved(3 downto 0));
-	   elsif out_enable then
-		  saved(7 downto 4) := state;
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process waddr_reg;
-  --
-  --  Register for enable bits
-  --
-  enable_reg : process(out_enable, set, addr, data)
-    variable saved : std_logic_vector (7 downto 0) := (others => '0');
-  begin
-	 if addr = enable_addr then
-      if set then
-        saved := data;
-		  enable_read <= saved(2);
-		  enable_write <= saved(1);
-		  start <= saved(0);
-	   elsif out_enable then
-	     data <= saved;
-      else
-	     data <= (others => 'Z');
-		end if;
-	 else
-      data <= (others => 'Z');
-    end if;
-  end process enable_reg;
 
 end rtl;
 

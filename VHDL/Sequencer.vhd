@@ -18,6 +18,7 @@ entity sequencer is
 		 enable_op1 : out std_logic;
 		 enable_op2 : out std_logic;
 		 enable_res : out std_logic;
+		 write_mux_sel : out std_logic;
 		 current_state : out std_logic_vector(3 downto 0));
 end entity sequencer;
 
@@ -48,6 +49,7 @@ begin
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '0';
+		  write_mux_sel <= '0';
 		  if start = '1' then
           next_state <= state_read_op;
 		  else
@@ -57,11 +59,13 @@ begin
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
 		  enable_res <= '0';
+		  write_mux_sel <= '1';
 		  next_state <= state_write_res;
 		when state_write_res =>  --  Write result from the ALU
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '1';
+		  write_mux_sel <= '1';
 		  if start = '0' then
 		    next_state <= state_null;
 		  else
@@ -71,6 +75,7 @@ begin
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '0';
+		  write_mux_sel <= '0';
 		  if start = '0' then
 		    next_state <= state_null;
 		  else
@@ -81,6 +86,7 @@ begin
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  enable_res <= '0';
+		  write_mux_sel <= '0';
 	 end case;
   end process state_machine;
 end rtl;

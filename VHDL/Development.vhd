@@ -138,8 +138,17 @@ architecture rtl of Development is
 --  Some constants for register base addresses
 --
   constant addr_count : natural := 0;
-  constant addr_cpu   : natural := addr_count + 2 + 15;
+  constant addr_cpu   : natural := addr_count + 2;
 begin
+  --
+  --  Start out with the I/O pins tri-stated.
+  --
+  bMKR_A <= (others => 'Z');
+  bMKR_D <= (others => 'Z');
+  bMKR_AREF <= 'Z';
+  --
+  --  Read signals from inputs and route to internal buses
+  --
   addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
   write_reg <= (bMKR_A(0) = '1');
   read_reg  <= (bMKR_A(1) = '1');

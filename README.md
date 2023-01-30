@@ -36,4 +36,5 @@ the package spec.  This should have been obvious to an Ada programer, but...
 for std_logic and std_ulogic.
 * This one didn't stump me yet, but I was looking into data busses on FPGAs and it seems
 that bidirectional busses are not a good idea.
-
+* Timing issues.  If you have an edge triggered signal to store data in a latch, don't use
+the same signal to select the data.

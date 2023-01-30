@@ -35,6 +35,7 @@ architecture rtl of CPU is
   signal enable_op1 : std_logic;
   signal enable_op2 : std_logic;
   signal enable_res : std_logic;
+  signal write_mux_sel : std_logic;
 
 begin
   sequence : work.sequencer
@@ -43,11 +44,12 @@ begin
              enable_op1 => enable_op1,
              enable_op2 => enable_op2,
              enable_res => enable_res,
+				 write_mux_sel => write_mux_sel,
 				 current_state => state);
 
   multiplexor : work.multiplexor2
     generic map(size => size)
-	 port map(selector => enable_res,
+	 port map(selector => write_mux_sel,
 	          inp1 => res,
 				 inp2 => w_data,
 				 out1 => reg);
