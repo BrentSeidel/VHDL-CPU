@@ -230,10 +230,10 @@ void loop()
                                              ALU_FLAG_CARRY);
   //
   test_cpu(0x80000000, 0, ALU_OP_SHR, 0x80000000, "0x80000000 SHR 0", ALU_FLAG_SIGN);
-  test_cpu(128, 1, ALU_OP_SHR, 64, "128 SHR 1", 0);
-  test_cpu(128, 3, ALU_OP_SHR, 16, "128 SHR 3", 0);
-  test_cpu(128, 7, ALU_OP_SHR, 1, "128 SHR 7", 0);
-  test_cpu(128, 8, ALU_OP_SHR, 0, "128 SHR 8", ALU_FLAG_ZERO);
+  test_cpu(0x80000000, 1, ALU_OP_SHR, 0x40000000, "0x80000000 SHR 1", 0);
+  test_cpu(0x80000000, 3, ALU_OP_SHR, 0x10000000, "0x80000000 SHR 3", 0);
+  test_cpu(0x80000000, 31, ALU_OP_SHR, 1, "0x80000000 SHR 31", 0);
+  test_cpu(0x80000000, 32, ALU_OP_SHR, 0, "0x80000000 SHR 32", ALU_FLAG_ZERO);
   Serial.println("End of CPU tests.");
   dump_cpu_reg();
   Serial.println();
@@ -364,24 +364,24 @@ void test_cpu(int op1, int op2, int func, int expected,
   int y;
 
   tests++;
+//
+//  Write test data into CPU registers 0 and 1 and set the ALU
+//  function.
+//
   cpu_write_reg(op1, 0);
   cpu_write_reg(op2, 1);
   write_addr(CPU_ENABLES, 0);
   write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
   write_addr(CPU_WADDR12, 2 & 0xF);
   write_addr(CPU_FUNCT, func);
+//
+//  Send a pulse to start the state machine
+//
   write_addr(CPU_ENABLES, 1);
-//  Serial.println("Starting state machine");
-  for (x = 0; x < 3; x++)
-  {
-    digitalWrite(SLOW_CLOCK, 1);
-    digitalWrite(SLOW_CLOCK, 0);
-    write_addr(CPU_ENABLES, 0);
-//    y = read_addr(CPU_WADDR12);
-//    Serial.print("State ");
-//    Serial.println((y & 0xF0) >> 4);
-  }
-
+  write_addr(CPU_ENABLES, 0);
+//
+//  Read the results from CPU register 2 and check the results.
+//
   y = cpu_read_reg(2);
   if (y == expected)
   {
