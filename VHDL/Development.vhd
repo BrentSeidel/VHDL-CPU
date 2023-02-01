@@ -13,100 +13,100 @@ entity Development is
 port
 (
 -- system signals
-iCLK : in std_logic ;
+iCLK : in std_logic;  --  I found a forum post stating that this is 48MHz
 
-iRESETn :in std_logic ;
-iSAM_INT: in std_logic ;
---oSAM_INT : out std_logic ;
+--iRESETn  : in std_logic;
+--iSAM_INT : in std_logic;
+--oSAM_INT : out std_logic;
 
 -- SDRAM
---oSDRAM_CLK : out std_logic ;
+--oSDRAM_CLK : out std_logic;
 --oSDRAM_ADDR : out std_logic_vector (11 downto 0 );
 --oSDRAM_BA : out std_logic_vector (1 downto 0 );
---oSDRAM_CASn : out std_logic ;
---oSDRAM_CKE : out std_logic ;
---oSDRAM_CSn : out std_logic ;
+--oSDRAM_CASn : out std_logic;
+--oSDRAM_CKE : out std_logic;
+--oSDRAM_CSn : out std_logic;
 --bSDRAM_DQ : inout std_logic_vector (15 downto 0 );
 --oSDRAM_DQM : out std_logic_vector (1 downto 0 );
---oSDRAM_RASn : out std_logic ;
---oSDRAM_WEn : out std_logic ;
+--oSDRAM_RASn : out std_logic;
+--oSDRAM_WEn : out std_logic;
 
 -- Mini PCIe
--- bPEX_RST : inout std_logic ;
--- bPEX_PIN6 : inout std_logic ;
--- bPEX_PIN8 : inout std_logic ;
--- bPEX_PIN10 : inout std_logic ;
--- iPEX_PIN11 : in std_logic ;
--- bPEX_PIN12 : inout std_logic ;
--- iPEX_PIN13 : in std_logic ;
--- bPEX_PIN14 : inout std_logic ;
--- bPEX_PIN16 : inout std_logic ;
--- bPEX_PIN20 : inout std_logic ;
--- iPEX_PIN23 : in std_logic ;
--- iPEX_PIN25 : in std_logic ;
--- bPEX_PIN28 : inout std_logic ;
--- bPEX_PIN30 : inout std_logic ;
--- iPEX_PIN31 : in std_logic ;
--- bPEX_PIN32 : inout std_logic ;
--- iPEX_PIN33 : in std_logic ;
--- bPEX_PIN42 : inout std_logic ;
--- bPEX_PIN44 : inout std_logic ;
--- bPEX_PIN45 : inout std_logic ;
--- bPEX_PIN46 : inout std_logic ;
--- bPEX_PIN47 : inout std_logic ;
--- bPEX_PIN48 : inout std_logic ;
--- bPEX_PIN49 : inout std_logic ;
--- bPEX_PIN51 : inout std_logic ;
+-- bPEX_RST : inout std_logic;
+-- bPEX_PIN6 : inout std_logic;
+-- bPEX_PIN8 : inout std_logic;
+-- bPEX_PIN10 : inout std_logic;
+-- iPEX_PIN11 : in std_logic;
+-- bPEX_PIN12 : inout std_logic;
+-- iPEX_PIN13 : in std_logic;
+-- bPEX_PIN14 : inout std_logic;
+-- bPEX_PIN16 : inout std_logic;
+-- bPEX_PIN20 : inout std_logic;
+-- iPEX_PIN23 : in std_logic;
+-- iPEX_PIN25 : in std_logic;
+-- bPEX_PIN28 : inout std_logic;
+-- bPEX_PIN30 : inout std_logic;
+-- iPEX_PIN31 : in std_logic;
+-- bPEX_PIN32 : inout std_logic;
+-- iPEX_PIN33 : in std_logic;
+-- bPEX_PIN42 : inout std_logic;
+-- bPEX_PIN44 : inout std_logic;
+-- bPEX_PIN45 : inout std_logic;
+-- bPEX_PIN46 : inout std_logic;
+-- bPEX_PIN47 : inout std_logic;
+-- bPEX_PIN48 : inout std_logic;
+-- bPEX_PIN49 : inout std_logic;
+-- bPEX_PIN51 : inout std_logic;
 
 -- NINA interface
--- bWM_PIO1 : inout std_logic ;
--- bWM_PIO2 : inout std_logic ;
--- bWM_PIO3 : inout std_logic ;
--- bWM_PIO4 : inout std_logic ;
--- bWM_PIO5 : inout std_logic ;
--- bWM_PIO7 : inout std_logic ;
--- bWM_PIO8 : inout std_logic ;
--- bWM_PIO18 : inout std_logic ;
--- bWM_PIO20 : inout std_logic ;
--- bWM_PIO21 : inout std_logic ;
--- bWM_PIO27 : inout std_logic ;
--- bWM_PIO28 : inout std_logic ;
--- bWM_PIO29 : inout std_logic ;
--- bWM_PIO31 : inout std_logic ;
--- iWM_PIO32 : in std_logic ;
--- bWM_PIO34 : inout std_logic ;
--- bWM_PIO35 : inout std_logic ;
--- bWM_PIO36 : inout std_logic ;
--- iWM_TX : in std_logic ;
--- oWM_RX : inout std_logic ;
--- oWM_RESET : inout std_logic ;
+-- bWM_PIO1 : inout std_logic;
+-- bWM_PIO2 : inout std_logic;
+-- bWM_PIO3 : inout std_logic;
+-- bWM_PIO4 : inout std_logic;
+-- bWM_PIO5 : inout std_logic;
+-- bWM_PIO7 : inout std_logic;
+-- bWM_PIO8 : inout std_logic;
+-- bWM_PIO18 : inout std_logic;
+-- bWM_PIO20 : inout std_logic;
+-- bWM_PIO21 : inout std_logic;
+-- bWM_PIO27 : inout std_logic;
+-- bWM_PIO28 : inout std_logic;
+-- bWM_PIO29 : inout std_logic;
+-- bWM_PIO31 : inout std_logic;
+-- iWM_PIO32 : in std_logic;
+-- bWM_PIO34 : inout std_logic;
+-- bWM_PIO35 : inout std_logic;
+-- bWM_PIO36 : inout std_logic;
+-- iWM_TX : in std_logic;
+-- oWM_RX : inout std_logic;
+-- oWM_RESET : inout std_logic;
 
 -- HDMI output
 -- oHDMI_TX : out std_logic_vector (2 downto 0 );
--- oHDMI_CLK : out std_logic ;
+-- oHDMI_CLK : out std_logic;
 
--- bHDMI_SDA : inout std_logic ;
--- bHDMI_SCL : inout std_logic ;
+-- bHDMI_SDA : inout std_logic;
+-- bHDMI_SCL : inout std_logic;
 
--- iHDMI_HPD : in std_logic ;
+-- iHDMI_HPD : in std_logic;
 
 -- MIPI input
 -- iMIPI_D : in std_logic_vector (1 downto 0 );
--- iMIPI_CLK : in std_logic ;
--- bMIPI_SDA : inout std_logic ;
--- bMIPI_SCL : inout std_logic ;
+-- iMIPI_CLK : in std_logic;
+-- bMIPI_SDA : inout std_logic;
+-- bMIPI_SCL : inout std_logic;
 -- bMIPI_GP : inout std_logic_vector (1 downto 0 );
 
 --// Q-SPI Flash interface
--- oFLASH_SCK : out std_logic ;
--- oFLASH_CS : out std_logic ;
--- oFLASH_MOSI : inout std_logic ;
--- iFLASH_MISO : inout std_logic ;
--- oFLASH_HOLD : inout std_logic ;
--- oFLASH_WP : inout std_logic;
+-- oFLASH_SCK  : out std_logic;
+-- oFLASH_CS   : out std_logic;
+-- oFLASH_MOSI : inout std_logic;
+-- iFLASH_MISO : inout std_logic;
+-- oFLASH_HOLD : inout std_logic;
+-- oFLASH_WP   : inout std_logic;
 
 -- SAM D21 PINS
-bMKR_AREF : inout std_logic ;
+bMKR_AREF : inout std_logic;
 bMKR_A : inout std_logic_vector (6 downto 0);
 bMKR_D : inout std_logic_vector (14 downto 0)
 
@@ -144,7 +144,13 @@ begin
   --  Start out with the I/O pins tri-stated.
   --
   bMKR_A <= (others => 'Z');
-  bMKR_D <= (others => 'Z');
+  bMKR_D(14) <= 'Z';
+  bMKR_D(13) <= 'Z';
+  bMKR_D(12) <= 'Z';
+  bMKR_D(11) <= 'Z';
+  bMKR_D(10) <= 'Z';
+  bMKR_D(9) <= 'Z';
+  bMKR_D(8) <= 'Z';
   bMKR_AREF <= 'Z';
   --
   --  Read signals from inputs and route to internal buses
@@ -167,8 +173,8 @@ begin
     generic map(location => addr_cpu)
 	 port map(data => bMKR_D(7 downto 0),
 	           out_enable => read_reg, set => write_reg, addr => addr_bus,
---				  clock => iCLK);
-				  clock => slow_clock);
+				  clock => iCLK);
+--				  clock => slow_clock);
 
 	end rtl;
 

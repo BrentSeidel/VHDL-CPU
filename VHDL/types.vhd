@@ -70,7 +70,7 @@ package body typedefs is
   end;
   --
   function flags_to_vec(flag : in t_FLAGS) return std_logic_vector is
-    variable temp : std_logic_vector(7 downto 0) := (others => '0');
+    variable temp : std_logic_vector(3 downto 0) := (others => '0');
   begin
     temp(0) := flag.carry;
 	 temp(1) := flag.sign;

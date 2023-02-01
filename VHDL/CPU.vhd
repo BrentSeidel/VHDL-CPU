@@ -35,7 +35,12 @@ architecture rtl of CPU is
   signal enable_op1 : std_logic;
   signal enable_op2 : std_logic;
   signal enable_res : std_logic;
-  signal write_mux_sel : std_logic;
+  signal set_psw    : std_logic;
+  signal alu_flags_in  : work.typedefs.t_FLAGS;
+  signal alu_flags_out : work.typedefs.t_FLAGS;
+  signal flags_to_psw  : std_logic_vector (3 downto 0);
+  signal write_mux_sel : std_logic;  --  Select source for writing to registers
+  signal psw_mux_sel   : std_logic;  --  Select source for writing to PSW
 
 begin
   sequence : work.sequencer
@@ -45,9 +50,18 @@ begin
              enable_op2 => enable_op2,
              enable_res => enable_res,
 				 write_mux_sel => write_mux_sel,
+				 psw_mux_sel => psw_mux_sel,
+				 set_psw => set_psw,
 				 current_state => state);
 
-  multiplexor : work.multiplexor2
+  pws_mux : work.multiplexor2
+    generic map(size => 4)
+	 port map(selector => psw_mux_sel,
+	          inp1 => work.typedefs.flags_to_vec(alu_flags_out),
+				 inp2 => work.typedefs.flags_to_vec(flags_in),
+				 out1 => flags_to_psw);
+
+  reg_mux : work.multiplexor2
     generic map(size => size)
 	 port map(selector => write_mux_sel,
 	          inp1 => res,
@@ -69,6 +83,13 @@ begin
              w_data  => reg,       --  From mux
              w_en    => (enable_res or w_en2));
 
+  psw : work.psw
+    port map(set_value => set_psw,
+	          flags_in  => work.typedefs.vec_to_flags(flags_to_psw),
+	          flags_out => alu_flags_in);
+
+  flags_out <= alu_flags_in;
+				 
   alu : work.alu
     generic map(size => size)
 	 port map(op1       => op1,  --  Internal
@@ -76,5 +97,5 @@ begin
 				 result    => res,  --  Internal
 	          funct     => funct,
 				 flags_in  => flags_in,
-				 flags_out => flags_out);
+				 flags_out => alu_flags_out);
 end rtl;
