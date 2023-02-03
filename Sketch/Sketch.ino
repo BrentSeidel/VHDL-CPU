@@ -35,6 +35,7 @@ const int ALU_OP_ADC = 9;
 const int ALU_OP_SBC = 10;
 const int ALU_OP_SHL = 11;
 const int ALU_OP_SHR = 12;
+const int ALU_OP_ERR = 255;  //  Unassigned code causes an error
 //
 //  ALU Flags
 const int ALU_FLAG_CARRY = 1;
@@ -80,6 +81,7 @@ void print_flags(int flag);
 void cpu_write_reg(int data, int addr);
 int cpu_read_reg(int addr);
 void dump_cpu_reg();
+void set_flags(int flags);
 void test_cpu(int op1, int op2, int func, int expected,
               const char *name, int flg);
 
@@ -146,6 +148,8 @@ void loop()
   //
   //  Start CPU tests
   Serial.println("Starting CPU tests.");
+  test_cpu(1, 2, ALU_OP_ERR, 0, "Error", ALU_FLAG_ERROR + ALU_FLAG_ZERO);
+  set_flags(0);
   test_cpu(31, 20, ALU_OP_ADD, 51, "31 ADD 20", 0);
   test_cpu(21, 40, ALU_OP_ADD, 61, "21 ADD 40", 0);
   test_cpu(0xFFFF, 1, ALU_OP_ADD, 0x10000, "FFFF ADD 1", 0);
@@ -214,12 +218,12 @@ void loop()
   test_cpu(-127, 255, ALU_OP_NEG, 127, "-127 NEG", 0);
   //
   test_cpu(100, 10, ALU_OP_ADC, 110, "100 ADC 10", 0);
-  write_addr(CPU_FLAGS, ALU_FLAG_CARRY);
+  set_flags(ALU_FLAG_CARRY);
   test_cpu(100, 10, ALU_OP_ADC, 111, "100 ADC 10", 0);
   //
-  write_addr(CPU_FLAGS, 0);
+  set_flags(0);
   test_cpu(100, 10, ALU_OP_SBC, 90, "100 SBC 10", 0);
-  write_addr(CPU_FLAGS, ALU_FLAG_CARRY);
+  set_flags(ALU_FLAG_CARRY);
   test_cpu(100, 10, ALU_OP_SBC, 89, "100 SBC 10", 0);
   //
   test_cpu(1, 0, ALU_OP_SHL, 1, "1 SHL 0", 0);
@@ -256,26 +260,25 @@ void print_flags(int flag)
   Serial.println((flag & ALU_FLAG_ERROR) ? "Error" : "No Error");
 }
 //
-//--  Base+  Type  Use
-//--    0    R/W   Write data bits 7-0
-//--    1    R/W   Write data bits 15-8
-//--    2    R/W   Write data bits 23-16
-//--    3    R/W   Write data bits 31-24
-//--    4     RO   Read data bits 7-0
-//--    5     RO   Read data bits 15-8
-//--    6     RO   Read data bits 23-16
-//--    7     RO   Read data bits 31-24
-//--    8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
-//--    9    R/W   Raddr 3 (bits 7-4)
-//--   10    R/W   Waddr   (bits 3-0)
-//--   11    R/W   ALU function
-//--   12    R/W   ALU flags
-//--   13    R/W   Enables
-//--                 7 - Renable 3
-//--                 6 - Renable 2
-//--                 5 - Renable 1
-//--                 1 - Wenable 2
-//--                 0 - Wenable 1
+//  Base+  Type  Use
+//    0    R/W   Write data bits 7-0
+//    1    R/W   Write data bits 15-8
+//    2    R/W   Write data bits 23-16
+//    3    R/W   Write data bits 31-24
+//    4     RO   Read data bits 7-0
+//    5     RO   Read data bits 15-8
+//    6     RO   Read data bits 23-16
+//    7     RO   Read data bits 31-24
+//    8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
+//    9    R/W   Raddr 3 (bits 7-4)
+//   10    R/W   Waddr   (bits 3-0)
+//   11    R/W   ALU function
+//   12    R/W   ALU flags
+//   13    R/W   Enables
+//                 3 - Enable flags
+//                 2 - Enable read
+//                 1 - Enable write
+//                 0 - Start state machine
 //const int CPU_WDATA1  = CPU_BASE;
 //const int CPU_WDATA2  = CPU_BASE + 1;
 //const int CPU_WDATA3  = CPU_BASE + 2;
@@ -334,6 +337,12 @@ void dump_cpu_reg()
     Serial.print(" is ");
     Serial.println(y, HEX);
   }
+}
+void set_flags(int flags)
+{
+  write_addr(CPU_FLAGS, flags);
+  write_addr(CPU_ENABLES, 8);
+  write_addr(CPU_ENABLES, 0);
 }
 
 void test_cpu_flags(int expected)

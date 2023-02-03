@@ -24,6 +24,7 @@ use ieee.std_logic_unsigned.all ;
 --   11    R/W   ALU function
 --   12    R/W   ALU flags
 --   13    R/W   Enables
+--                 3 - Enable flags
 --                 2 - Enable read
 --                 1 - Enable write
 --                 0 - Start state machine
@@ -64,6 +65,7 @@ architecture rtl of CPU32 is
   signal enable_read    : std_logic;
   signal enable_write   : std_logic;
   signal func_value     : work.typedefs.byte;
+  signal flags_en       : std_logic;
   signal flags_pre      : work.typedefs.t_FLAGS;
   signal flags_post     : work.typedefs.t_FLAGS;
   signal state          : std_logic_vector(3 downto 0);
@@ -84,7 +86,8 @@ begin
 		 w_data    => write_bus,
 		 w_en2     => enable_write,
        funct     => func_value, --  ALU Function
-       flags_in  => flags_pre,  --  ALU Flags in
+		 flags_en  => flags_en,     --  Set ALU flags
+       flags_in  => flags_pre,    --  ALU Flags in
        flags_out => flags_post);  --  ALU Flags out
   --
   --  Register for general data registers
@@ -170,11 +173,13 @@ begin
 		  end if;
 		when enable_addr =>  --  Enable/control bits
         if set then
-		    enable_read <= data(2);
+		    flags_en     <= data(3);
+		    enable_read  <= data(2);
 		    enable_write <= data(1);
 		    start <= data(0);
 	     elsif out_enable then
-		    data <= (0 => start, 1 => enable_write, 2 => enable_read, others => '0');
+		    data <= (0 => start, 1 => enable_write, 2 => enable_read,
+			          3 => flags_en, others => '0');
 		  end if;
       when others =>
 	     data <= (others => 'Z');

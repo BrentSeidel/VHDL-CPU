@@ -59,7 +59,6 @@ begin
         temp := t1 xor t2;
       when work.typedefs.ALU_OP_TST =>  --  Test op1 and set flags.  Op2 is ignored
         temp := t1;
---		  temp := (others => '1');
       when work.typedefs.ALU_OP_NEG =>  --  Negative of op1.  Op2 is ignored
         temp := ZERO - t1;
         temp(size) := '0';
@@ -67,7 +66,7 @@ begin
 		  temp := std_logic_vector(shift_left(unsigned(t1), natural(to_integer(unsigned(t2)))));
 		when work.typedefs.ALU_OP_SHR =>  --  Shift right
 		  temp := std_logic_vector(shift_right(unsigned(t1), natural(to_integer(unsigned(t2)))));
-      when others =>
+      when others =>  --  This is an error condition with an unknown code
         flags_out.error <= '1';
         temp := (others => '0');
     end case;
@@ -79,6 +78,5 @@ begin
       flags_out.zero <= '0';
     end if;
     result <= temp(size-1 downto 0);
---    result <= (others => '1');
   end process store;
 end rtl;

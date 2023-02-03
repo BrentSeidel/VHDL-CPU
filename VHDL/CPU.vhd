@@ -23,6 +23,7 @@ entity CPU is
 		 w_data  : in std_logic_vector (size-1 downto 0);
 		 w_en2   : in std_logic;  --  Write external data
        funct     : in work.typedefs.byte;
+		 flags_en  : in std_logic;  --  Write flags
        flags_in  : in work.typedefs.t_FLAGS;
        flags_out : out work.typedefs.t_FLAGS);
 end entity CPU;
@@ -84,7 +85,7 @@ begin
              w_en    => (enable_res or w_en2));
 
   psw : work.psw
-    port map(set_value => set_psw,
+    port map(set_value => set_psw or flags_en,
 	          flags_in  => work.typedefs.vec_to_flags(flags_to_psw),
 	          flags_out => alu_flags_in);
 
@@ -92,10 +93,10 @@ begin
 				 
   alu : work.alu
     generic map(size => size)
-	 port map(op1       => op1,  --  Internal
-	          op2       => op2,  --  Internal
-				 result    => res,  --  Internal
-	          funct     => funct,
-				 flags_in  => flags_in,
+	 port map(op1       => op1,
+	          op2       => op2,
+				 result    => res,
+	          funct     => funct,  --  External
+				 flags_in  => alu_flags_in,
 				 flags_out => alu_flags_out);
 end rtl;

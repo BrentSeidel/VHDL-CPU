@@ -115,24 +115,34 @@ end Development ;
 --
 --  Memory map
 --  Addr  Usage
---    0   Reg0
---    1   Reg1
---    2   Reg2
---    3   ALU Op 1
---    4   ALU Op 2
---    5   ALU Func
---    6   ALU Flags
---    7   ALU Result
---    8   Counter LSB
---    9   Counter MSB
+--    0   Counter LSB
+--    1   Counter MSB
+--    2+  CPU32 registers
+--      0    R/W   Write data bits 7-0
+--      1    R/W   Write data bits 15-8
+--      2    R/W   Write data bits 23-16
+--      3    R/W   Write data bits 31-24
+--      4     RO   Read data bits 7-0
+--      5     RO   Read data bits 15-8
+--      6     RO   Read data bits 23-16
+--      7     RO   Read data bits 31-24
+--      8    R/W   Raddr 1 (bits 7-4) Raddr 2 (bits 3-0)
+--      9    R/W   Raddr 3 (bits 7-4)
+--     10    R/W   Waddr (bits 3-0)
+--     11    R/W   ALU function
+--     12    R/W   ALU flags
+--     13    R/W   Enables
+--                 2 - Enable read
+--                 1 - Enable write
+--                 0 - Start state machine
 --
 architecture rtl of Development is
 --
 --  Translate the physical pins into internal signals
 --
-  signal addr_bus  : work.typedefs.byte;
-  signal write_reg : boolean;
-  signal read_reg  : boolean;
+  signal addr_bus   : work.typedefs.byte;
+  signal write_reg  : boolean;
+  signal read_reg   : boolean;
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
 --
 --  Some constants for register base addresses
