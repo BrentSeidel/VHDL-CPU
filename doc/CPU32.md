@@ -9,7 +9,7 @@ The main components are:
 * [Register file](Register.md) - created and seems to work
 * [ALU](ALU.md) - created and seems to work
 * Sequencer - Preliminary version created
-* Processor Status Word - TBD
+* Processor Status Word - Preliminary version created with processor flags
 * Instruction decoder - TBD
 * Bus Interface - TBD
 

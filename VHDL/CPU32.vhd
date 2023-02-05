@@ -31,9 +31,10 @@ use ieee.std_logic_unsigned.all ;
 --
 entity CPU32 is
   generic (location : work.typedefs.byte);
-  port (data : inout std_logic_vector (7 downto 0);
+  port (data_in  : in std_logic_vector (7 downto 0);
+        data_out : out std_logic_vector (7 downto 0);
         out_enable : in boolean;
-		  set : in boolean;
+		  set  : in boolean;
 		  addr : in work.typedefs.byte;
 		  clock : in std_logic);
 end entity CPU32;
@@ -92,100 +93,100 @@ begin
   --
   --  Register for general data registers
   --
-  general_reg : process(out_enable, set, addr, data, write_bus,
+  general_reg : process(out_enable, set, addr, data_in, write_bus,
     read_bus, func_value, flags_post, raddr1, raddr2, raddr3,
 	 state, waddr, enable_read, enable_write, start)
   begin
     case addr is
 	   when Wdata1_addr =>  --  Write data 1
         if set then
-	       write_bus(7 downto 0) <= data;
+	       write_bus(7 downto 0) <= data_in;
 	     elsif out_enable then
-	       data <= write_bus(7 downto 0);
+	       data_out <= write_bus(7 downto 0);
 		  end if;
 	   when Wdata2_addr =>  --  Write data 2
         if set then
-	       write_bus(15 downto 8) <= data;
+	       write_bus(15 downto 8) <= data_in;
 	     elsif out_enable then
-	       data <= write_bus(15 downto 8);
+	       data_out <= write_bus(15 downto 8);
 		  end if;
 	   when Wdata3_addr =>  --  Write data 3
         if set then
-	       write_bus(23 downto 16) <= data;
+	       write_bus(23 downto 16) <= data_in;
 	     elsif out_enable then
-	       data <= write_bus(23 downto 16);
+	       data_out <= write_bus(23 downto 16);
 		  end if;
 	   when Wdata4_addr =>  --  Write data 4
         if set then
-	       write_bus(31 downto 24) <= data;
+	       write_bus(31 downto 24) <= data_in;
 	     elsif out_enable then
-	       data <= write_bus(31 downto 24);
+	       data_out <= write_bus(31 downto 24);
 		  end if;
 		when funct_addr =>  --  ALU function
         if set then
-		    func_value <= work.typedefs.vec_to_byte(data);
+		    func_value <= work.typedefs.vec_to_byte(data_in);
 	     elsif out_enable then
-	       data <= work.typedefs.byte_to_vec(func_value);
+	       data_out <= work.typedefs.byte_to_vec(func_value);
 		  end if;
 		when flag_addr =>  --  ALU flags
         if set then
-		    flags_pre <= work.typedefs.vec_to_flags(data);
+		    flags_pre <= work.typedefs.vec_to_flags(data_in);
 	     elsif out_enable then
-		    data(7 downto 4) <= (others => '0');
-	       data(3 downto 0) <= work.typedefs.flags_to_vec(flags_post);
+		    data_out(7 downto 4) <= (others => '0');
+	       data_out(3 downto 0) <= work.typedefs.flags_to_vec(flags_post);
 		  end if;
 		when Rdata1_addr =>  --  Read data 1
 	     if (not set) and out_enable then
-	       data <= read_bus(7 downto 0);
+	       data_out <= read_bus(7 downto 0);
 		  end if;
 		when Rdata2_addr =>  --  Read data 2
 	     if (not set) and out_enable then
-	       data <= read_bus(15 downto 8);
+	       data_out <= read_bus(15 downto 8);
 		  end if;
 		when Rdata3_addr =>  --  Read data 3
 	     if (not set) and out_enable then
-	       data <= read_bus(23 downto 16);
+	       data_out <= read_bus(23 downto 16);
 		  end if;
 		when Rdata4_addr =>  --  Read data 4
 	     if (not set) and out_enable then
-	       data <= read_bus(31 downto 24);
+	       data_out <= read_bus(31 downto 24);
 		  end if;
 		when Raddr12_addr =>  --  Read register addresses 1 & 2
         if set then
-	       raddr1 <= work.typedefs.vec_to_byte(data(7 downto 4));
-		    raddr2 <= work.typedefs.vec_to_byte(data(3 downto 0));
+	       raddr1 <= work.typedefs.vec_to_byte(data_in(7 downto 4));
+		    raddr2 <= work.typedefs.vec_to_byte(data_in(3 downto 0));
 	     elsif out_enable then
-		    data(7 downto 4) <= work.typedefs.byte_to_vec(raddr1)(3 downto 0);
-		    data(3 downto 0) <= work.typedefs.byte_to_vec(raddr2)(3 downto 0);
+		    data_out(7 downto 4) <= work.typedefs.byte_to_vec(raddr1)(3 downto 0);
+		    data_out(3 downto 0) <= work.typedefs.byte_to_vec(raddr2)(3 downto 0);
 		  end if;
 		when Raddr3_addr =>  --  Read register address 3
         if set then
-		    raddr3 <= work.typedefs.vec_to_byte(data(7 downto 4));
+		    raddr3 <= work.typedefs.vec_to_byte(data_in(7 downto 4));
 	     elsif out_enable then
-	       data <= work.typedefs.byte_to_vec(raddr3);
+	       data_out <= work.typedefs.byte_to_vec(raddr3);
 		  end if;
 		when Waddr_addr =>  --  Write register address
         if set then
-		    waddr <= work.typedefs.vec_to_byte(data(3 downto 0));
+		    waddr <= work.typedefs.vec_to_byte(data_in(3 downto 0));
 	     elsif out_enable then
-		    data(7 downto 4) <= state;
-	       data(3 downto 0) <= work.typedefs.byte_to_vec(waddr)(3 downto 0);
+		    data_out(7 downto 4) <= state;
+	       data_out(3 downto 0) <= work.typedefs.byte_to_vec(waddr)(3 downto 0);
 		  end if;
 		when enable_addr =>  --  Enable/control bits
         if set then
-		    flags_en     <= data(3);
-		    enable_read  <= data(2);
-		    enable_write <= data(1);
-		    start <= data(0);
+		    flags_en     <= data_in(3);
+		    enable_read  <= data_in(2);
+		    enable_write <= data_in(1);
+		    start        <= data_in(0);
 	     elsif out_enable then
-		    data <= (0 => start, 1 => enable_write, 2 => enable_read,
-			          3 => flags_en, others => '0');
+		    data_out <= (0 => start, 1 => enable_write, 2 => enable_read,
+			              3 => flags_en, others => '0');
 		  end if;
       when others =>
-	     data <= (others => 'Z');
+	     data_out <= data_in;
     end case;		
 	 if (not set) and (not out_enable) then
-      data <= (others => 'Z');
+      data_out <= data_in;
 	 end if;
   end process general_reg;
 

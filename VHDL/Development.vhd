@@ -141,6 +141,9 @@ architecture rtl of Development is
 --  Translate the physical pins into internal signals
 --
   signal addr_bus   : work.typedefs.byte;
+  signal data_in    : std_logic_vector (7 downto 0);
+  signal data_out   : std_logic_vector (7 downto 0);
+  signal data_b1    : std_logic_vector (7 downto 0);
   signal write_reg  : boolean;
   signal read_reg   : boolean;
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
@@ -169,19 +172,22 @@ begin
   write_reg <= (bMKR_A(0) = '1');
   read_reg  <= (bMKR_A(1) = '1');
   slow_clock <= bMKR_A(2);
+  data_in <= bMKR_D(7 downto 0);
+  bMKR_D(7 downto 0) <= data_out when (not write_reg) and read_reg else
+                        (others => 'Z');
 --
 --  Define registers for counter
 --
   counter : entity work.Counter
     generic map(location => addr_count)
-	 port map(data => bMKR_D(7 downto 0),
+	 port map(data_in => data_in, data_out => data_b1,
 	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
 --
 --  Define registers to control/test CPU
 --
   cpu32 : entity work.CPU32
     generic map(location => addr_cpu)
-	 port map(data => bMKR_D(7 downto 0),
+	 port map(data_in => data_b1, data_out => data_out,
 	           out_enable => read_reg, set => write_reg, addr => addr_bus,
 				  clock => iCLK);
 --				  clock => slow_clock);

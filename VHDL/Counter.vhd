@@ -7,7 +7,8 @@ use ieee.std_logic_1164.all ;
 use ieee.std_logic_unsigned.all ;
 entity Counter is
   generic (location : work.typedefs.byte);
-  port (data : inout std_logic_vector (7 downto 0);
+  port (data_in  : in std_logic_vector (7 downto 0);
+        data_out : out std_logic_vector (7 downto 0);
         out_enable : in boolean;
 		  set : in boolean;
 		  addr : in work.typedefs.byte;
@@ -21,7 +22,7 @@ end entity Counter;
 --
 architecture rtl of Counter is
 begin
-  count : process(out_enable, set, addr, data, clock)
+  count : process(out_enable, set, addr, data_in, clock)
     variable value : std_logic_vector(31 downto 0) := (others => '0');
 	 variable temp : std_logic_vector(31 downto 0);
   begin
@@ -31,18 +32,18 @@ begin
 	 if addr = location then
 	   if out_enable and not set then
 		  temp := value;
-	     data <= temp(23 downto 16);
+	     data_out <= temp(23 downto 16);
       else
-	     data <= (others => 'Z');
+		  data_out <= data_in;
 		end if;
 	 elsif addr = location+1 then
 	   if out_enable and not set then
-	     data <= temp(31 downto 24);
+	     data_out <= temp(31 downto 24);
       else
-	     data <= (others => 'Z');
+		  data_out <= data_in;
 		end if;
 	 else
-      data <= (others => 'Z');
+      data_out <= data_in;
     end if;
   end process count;
 end rtl;
