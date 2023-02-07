@@ -8,6 +8,8 @@ library ieee;
 use ieee.std_logic_1164.all ;
 use ieee.std_logic_unsigned.all ;
 use ieee.Numeric_Std.all;
+library lpm;
+use lpm.lpm_components.all;  --  For RAM block
 
 entity Development is
 port
@@ -147,6 +149,10 @@ architecture rtl of Development is
   signal write_reg  : boolean;
   signal read_reg   : boolean;
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
+  signal cpu_addr     : std_logic_vector (31 downto 0);
+  signal cpu_data_in  : std_logic_vector (31 downto 0);
+  signal cpu_data_out : std_logic_vector (31 downto 0);
+  signal write_enable : std_logic;
 --
 --  Some constants for register base addresses
 --
@@ -176,21 +182,35 @@ begin
   bMKR_D(7 downto 0) <= data_out when (not write_reg) and read_reg else
                         (others => 'Z');
 --
---  Define registers for counter
+--  Instantiate the counter entity
 --
-  counter : entity work.Counter
+  counter: entity work.Counter
     generic map(location => addr_count)
 	 port map(data_in => data_in, data_out => data_b1,
 	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => iCLK);
 --
---  Define registers to control/test CPU
+--  Instantiate the CPU and test system
 --
-  cpu32 : entity work.CPU32
+  cpu32: entity work.CPU32
     generic map(location => addr_cpu)
 	 port map(data_in => data_b1, data_out => data_out,
 	           out_enable => read_reg, set => write_reg, addr => addr_bus,
 				  clock => iCLK);
 --				  clock => slow_clock);
+--
+--  Create a 1kword RAM block for testing
+--
+  cpu_data_out <= (others => '0');
+  cpu_addr <= (others => '0');
+  write_enable <= '0';
+  ram: lpm_ram_dq
+    generic map(lpm_widthad => 10, lpm_width => 32)
+	 port map(data =>cpu_data_out,
+	          address => cpu_addr(9 downto 0),
+				 we => write_enable,
+				 q => cpu_data_in,
+				 inclock => iCLK,
+				 outclock => iCLK);
 
 	end rtl;
 

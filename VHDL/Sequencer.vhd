@@ -40,7 +40,7 @@ begin
 		temp := state'Pos(state);
 		current_state <= std_logic_vector(to_unsigned(temp, 4));
     end if;
-  end process;
+  end process state_advance;
   --
   --  Compute what the next state should be and set output signals.
   --
