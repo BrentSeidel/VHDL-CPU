@@ -11,7 +11,7 @@ The main components are:
 * Sequencer - Preliminary version created
 * Processor Status Word - Preliminary version created with processor flags
 * Instruction decoder - TBD
-* Bus Interface - TBD
+* (Bus Interface)[BIU.md] - Work started
 
 This will probably never be a particularly high performance or sophisticated
 CPU.  I will declare victory once I get a basic set of instructions to
