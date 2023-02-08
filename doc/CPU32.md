@@ -21,10 +21,4 @@ The Vidor 4000 also has a 8 MB SDRAM chip that will require a memory
 controller to access.  This would be outside of the CPU, but would be
 needed for it to really be useful.
 
-## Instruction Set
-Note that there are several constraints made to simplify things.  Some of these
-may be relaxed in the future as the design develops.
-* The smallest addressable item is a 32-bit word.
-* This is a load-store architecture.
-* Instructions are all 32 bits long (sometimes followed by 32 bit data).
-* There are no floating point operations. (this would be an interesting future exercise)
+[Instruction Set](InstrNotes.md) notes have been moved to their own file.
