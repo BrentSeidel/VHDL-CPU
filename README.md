@@ -26,6 +26,7 @@ I'm starting to write some simple documentation.  Most of it should be linked fr
 section:
 * [Bus between CPU and FPGA](doc/Bus.md)
 * [CPU Description](doc/CPU32.md)
+* [CPU Bus Description](doc/CPU-Bus.md)
 
 ## Lessons Learned
 This is a list of things that I've learned.  These are the more major items that have had
