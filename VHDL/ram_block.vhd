@@ -16,12 +16,13 @@
 --    5     RO   Read data bits 15-8
 --    6     RO   Read data bits 23-16
 --    7     RO   Read data bits 31-24
---    8    R/W   Addr LSB
---    9    R/W   Addr MSB
---   10    R/W   Control Bits
---                 2 - Enable read
---                 1 - Enable write
---                 0 - Disconnect CPU
+--    8    R/W   Addr LSB (7-0)
+--    9    R/W   Addr MSB (9-8)
+--                 4 - Enable read
+--                 3 - Enable write
+--                 2 - Disconnect CPU
+--                 1 - Addr bit 9
+--                 0 - Addr bit 8
 --
 --  To prevent conflict, the Disconnect CPU bit should be set
 --  before the host reads and writes the RAM.
@@ -36,39 +37,147 @@ use lpm.lpm_components.all;
 entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
          host_location : work.typedefs.byte);             --  Location for host registers
-  port(cpu_data_out  : in std_logic_vector (31 downto 0);  --  From CPU
-       cpu_data_in   : out std_logic_vector (31 downto 0);  --  To CPU
-		 cpu_addr      : in std_logic_vector (31 downto 0);  --  From CPU
-		 read_in   : in std_logic;
-		 write_in  : in std_logic;
-		 read_out  : out std_logic;
-		 write_out : out std_logic;
-		 ack_in    : in std_logic;
-		 ack_out   : out std_logic;
-		 clock         : in std_logic;
-		 host_data_in  : in std_logic_vector (7 downto 0);
-       host_data_out : out std_logic_vector (7 downto 0);
+  port(cpu_data_out    : in std_logic_vector (31 downto 0);  --  From CPU
+       cpu_data_in     : out std_logic_vector (31 downto 0);  --  To CPU
+		 cpu_data_next   : out std_logic_vector (31 downto 0);  --  To next device
+		 cpu_addr        : in std_logic_vector (31 downto 0);  --  From CPU
+		 read_in         : in std_logic;
+		 write_in        : in std_logic;
+		 ack_in          : in std_logic;
+		 ack_out         : out std_logic;
+		 clock           : in std_logic;
+		 host_data_in    : in std_logic_vector (7 downto 0);
+       host_data_out   : out std_logic_vector (7 downto 0);
        host_out_enable : in boolean;
-	    host_set      : in boolean;
-	    host_addr     : in work.typedefs.byte);
+	    host_set        : in boolean;
+	    host_addr       : in work.typedefs.byte);
 end ram_block;
 
 architecture rtl of ram_block is
+  constant Wdata1_addr  : work.typedefs.byte := host_location;
+  constant Wdata2_addr  : work.typedefs.byte := host_location + 1;
+  constant Wdata3_addr  : work.typedefs.byte := host_location + 2;
+  constant Wdata4_addr  : work.typedefs.byte := host_location + 3;
+  constant Rdata1_addr  : work.typedefs.byte := host_location + 4;
+  constant Rdata2_addr  : work.typedefs.byte := host_location + 5;
+  constant Rdata3_addr  : work.typedefs.byte := host_location + 6;
+  constant Rdata4_addr  : work.typedefs.byte := host_location + 7;
+  constant Addr1_addr   : work.typedefs.byte := host_location + 8;
+  constant Addr2_addr   : work.typedefs.byte := host_location + 9;
+  signal host_ram_data_in  : std_logic_vector (31 downto 0);
+  signal host_ram_data_out : std_logic_vector (31 downto 0);
+  signal host_ram_addr     : std_logic_vector (9 downto 0);
+  signal host_write : std_logic;
+  signal host_read  : std_logic;
+  signal host_disconnect_cpu : std_logic;
+  signal cpu_selected : boolean;
+  signal ram_data_in  : std_logic_vector (31 downto 0);
+  signal ram_addr : std_logic_vector (9 downto 0);
   signal q  : std_logic_vector (31 downto 0);  --  Local data out
   signal we : std_logic;  --  Local write enable
 begin
   ram: lpm_ram_dq
     generic map(lpm_widthad => 10, lpm_width => 32)
-	 port map(data =>cpu_data_out,
-	          address => cpu_addr(9 downto 0),
+	 port map(data =>ram_data_in,
+	          address => ram_addr,
 				 we => we,
 				 q => q,
 				 inclock => clock,
 				 outclock => clock);
+  host_ram_data_out <= q;
 --
---  Handle device selection.  If not selected, just pass data through and force write_enable false.
+--  Handle device selection.
 --
-  cpu_data_in <= q when (cpu_location(31 downto 10) = cpu_addr(31 downto 10)) else
+  cpu_data_next <= cpu_data_out;  -- Daisy chain to next device
+  cpu_selected <= (cpu_location(31 downto 10) = cpu_addr(31 downto 10)) and not (host_disconnect_cpu = '1');
+  cpu_data_in <= q when cpu_selected else
                  cpu_data_out;
-  we <= write_in when (cpu_location(31 downto 10) = cpu_addr(31 downto 10)) else '0';
+  we <= write_in when cpu_selected else host_write;
+  ram_data_in <= cpu_data_out when cpu_selected else host_ram_data_in;
+  ram_addr <= cpu_addr(9 downto 0) when cpu_selected else host_ram_addr;
+--
+--  Control process
+--
+  ram_ctrl: process(host_out_enable, host_set, host_addr, host_data_in)
+  begin
+    case host_addr is
+	   when Wdata1_addr =>  --  Write data 1
+        if host_set then
+	       host_ram_data_in(7 downto 0) <= host_data_in;
+			 host_data_out <= host_data_in;
+	     elsif host_out_enable then
+	       host_data_out <= host_ram_data_in(7 downto 0);
+		  end if;
+	   when Wdata2_addr =>  --  Write data 2
+        if host_set then
+	       host_ram_data_in(15 downto 8) <= host_data_in;
+			 host_data_out <= host_data_in;
+	     elsif host_out_enable then
+	       host_data_out <= host_ram_data_in(15 downto 8);
+		  end if;
+	   when Wdata3_addr =>  --  Write data 3
+        if host_set then
+	       host_ram_data_in(23 downto 16) <= host_data_in;
+			 host_data_out <= host_data_in;
+	     elsif host_out_enable then
+	       host_data_out <= host_ram_data_in(23 downto 16);
+		  end if;
+	   when Wdata4_addr =>  --  Write data 4
+        if host_set then
+	       host_ram_data_in(31 downto 24) <= host_data_in;
+	     elsif host_out_enable then
+	       host_data_out <= host_ram_data_in(31 downto 24);
+		  end if;
+		when Rdata1_addr =>  --  Read data 1
+	     if (not host_set) and host_out_enable then
+	       host_data_out <= host_ram_data_out(7 downto 0);
+		  else
+			 host_data_out <= host_data_in;
+		  end if;
+		when Rdata2_addr =>  --  Read data 2
+	     if (not host_set) and host_out_enable then
+	       host_data_out <= host_ram_data_out(15 downto 8);
+		  else
+			 host_data_out <= host_data_in;
+		  end if;
+		when Rdata3_addr =>  --  Read data 3
+	     if (not host_set) and host_out_enable then
+	       host_data_out <= host_ram_data_out(23 downto 16);
+		  else
+			 host_data_out <= host_data_in;
+		  end if;
+		when Rdata4_addr =>  --  Read data 4
+	     if (not host_set) and host_out_enable then
+	       host_data_out <= host_ram_data_out(31 downto 24);
+		  else
+			 host_data_out <= host_data_in;
+		  end if;
+		when Addr1_addr =>  --  Write register address
+        if host_set then
+		    host_ram_addr(7 downto 0) <= host_data_in;
+			 host_data_out <= host_data_in;
+	     elsif host_out_enable then
+		    host_data_out <= host_ram_addr(7 downto 0);
+		  end if;
+		when Addr2_addr =>  --  Write register address
+        if host_set then
+		    host_ram_addr(9 downto 8) <= host_data_in(1 downto 0);
+			 host_read <= host_data_in(4);
+			 host_write <= host_data_in(3);
+			 host_disconnect_cpu <= host_data_in(2);
+			 host_data_out <= host_data_in;
+	     elsif host_out_enable then
+		    host_data_out(1 downto 0) <= host_ram_addr(9 downto 8);
+			 host_data_out(2) <= host_disconnect_cpu;
+			 host_data_out(3) <= host_write;
+			 host_data_out(4) <= host_read;
+			 host_data_out(7 downto 5) <= (others => '0');
+		  end if;
+      when others =>  --  Not being addressed
+	     host_data_out <= host_data_in;
+    end case;		
+	 if (not host_set) and (not host_out_enable) then
+      host_data_out <= host_data_in;
+	 end if;
+  end process ram_ctrl;
 end rtl;

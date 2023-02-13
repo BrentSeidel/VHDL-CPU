@@ -47,8 +47,7 @@ const int ALU_FLAG_ERROR = 8;
 const int COUNT_LSB = 0;
 const int COUNT_MSB = COUNT_LSB + 1;
 //
-//
-//  CPU control registers
+//  CPU Control Registers
 const int CPU_BASE    = COUNT_LSB + 2;
 const int CPU_WDATA1  = CPU_BASE;
 const int CPU_WDATA2  = CPU_BASE + 1;
@@ -64,6 +63,19 @@ const int CPU_WADDR12 = CPU_BASE + 10;
 const int CPU_FUNCT   = CPU_BASE + 11;
 const int CPU_FLAGS   = CPU_BASE + 12;
 const int CPU_ENABLES = CPU_BASE + 13;
+//
+//  RAM Control Registers
+const int RAM_BASE = CPU_BASE + 14;
+const int RAM_WDATA1 = CPU_BASE;
+const int RAM_WDATA2 = CPU_BASE + 1;
+const int RAM_WDATA3 = CPU_BASE + 2;
+const int RAM_WDATA4 = CPU_BASE + 3;
+const int RAM_RDATA1 = CPU_BASE + 4;
+const int RAM_RDATA2 = CPU_BASE + 5;
+const int RAM_RDATA3 = CPU_BASE + 6;
+const int RAM_RDATA4 = CPU_BASE + 7;
+const int RAM_ADDR1  = CPU_BASE + 8;
+const int RAM_ADDR2  = CPU_BASE + 9;
 //
 //  Global counters for test pass and fail
 int tests  = 0;
@@ -84,6 +96,8 @@ void dump_cpu_reg();
 void set_flags(int flags);
 void test_cpu(int op1, int op2, int func, int expected,
               const char *name, int flg);
+void ram_write(int addr, int data);
+int ram_read(int addr);
 
 void setup()
 {
@@ -239,7 +253,7 @@ void loop()
   test_cpu(0x80000000, 31, ALU_OP_SHR, 1, "0x80000000 SHR 31", 0);
   test_cpu(0x80000000, 32, ALU_OP_SHR, 0, "0x80000000 SHR 32", ALU_FLAG_ZERO);
   Serial.println("End of CPU tests.");
-  dump_cpu_reg();
+//  dump_cpu_reg();
   Serial.println();
   Serial.print(tests);
   Serial.print(" tests, ");
@@ -247,6 +261,27 @@ void loop()
   Serial.print(" passed, ");
   Serial.print(fails);
   Serial.println(" failed");
+  Serial.println("Some simple RAM testing");
+  for (x = 16; x >= 16; x--)
+  {
+    ram_write(x, x+0xF00);
+  }
+  for (x = 0; x < 16; x++)
+  {
+    y = ram_read(x);
+    Serial.print("Data in location ");
+    Serial.print(x, HEX);
+    Serial.print(" is ");
+    Serial.print(y, HEX);
+    if (y == (x + 0xF00))
+    {
+      Serial.println("  Pass");
+    }
+    else
+    {
+      Serial.println("  FAIL!");
+    }
+  }
   while (1);
 }
 //
@@ -279,25 +314,10 @@ void print_flags(int flag)
 //                 2 - Enable read
 //                 1 - Enable write
 //                 0 - Start state machine
-//const int CPU_WDATA1  = CPU_BASE;
-//const int CPU_WDATA2  = CPU_BASE + 1;
-//const int CPU_WDATA3  = CPU_BASE + 2;
-//const int CPU_WDATA4  = CPU_BASE + 3;
-//const int CPU_RDATA1  = CPU_BASE + 4;
-//const int CPU_RDATA2  = CPU_BASE + 5;
-//const int CPU_RDATA3  = CPU_BASE + 6;
-//const int CPU_RDATA4  = CPU_BASE + 7;
-//const int CPU_RADDR12 = CPU_BASE + 8;
-//const int CPU_RADDR3  = CPU_BASE + 9;
-//const int CPU_WADDR12 = CPU_BASE + 10;
-//const int CPU_FUNCT   = CPU_BASE + 11;
-//const int CPU_FLAGS   = CPU_BASE + 12;
-//const int CPU_ENABLES = CPU_BASE + 13;
 //
 //  Write to a CPU register using write port
 void cpu_write_reg(int data, int addr)
 {
-  int temp;
   write_addr(CPU_ENABLES, 0);
   write_addr(CPU_WADDR12, addr & 0xF);
   write_addr(CPU_WDATA1, data & 0xFF);
@@ -412,6 +432,52 @@ void test_cpu(int op1, int op2, int func, int expected,
   }
   Serial.print(", Flags ");
   test_cpu_flags(flg);
+}
+///////////////////////////////////////////////////////
+//
+//  Define some functions to access the FPGA RAM block
+//
+//  Base+  Type  Use
+//    0    R/W   Write data bits 7-0
+//    1    R/W   Write data bits 15-8
+//    2    R/W   Write data bits 23-16
+//    3    R/W   Write data bits 31-24
+//    4     RO   Read data bits 7-0
+//    5     RO   Read data bits 15-8
+//    6     RO   Read data bits 23-16
+//    7     RO   Read data bits 31-24
+//    8    R/W   Addr LSB (7-0)
+//    9    R/W   Addr MSB (9-8)
+//                 4 - Enable read
+//                 3 - Enable write
+//                 2 - Disconnect CPU
+//                 1 - Addr bit 9
+//                 0 - Addr bit 8
+void ram_write(int addr, int data)
+{
+  write_addr(RAM_ADDR2, 4);  //  Disconnect CPU
+  write_addr(RAM_WDATA1, data & 0xFF);
+  write_addr(RAM_WDATA2, (data >> 8) & 0xFF);
+  write_addr(RAM_WDATA3, (data >> 16) & 0xFF);
+  write_addr(RAM_WDATA4, (data >> 24) & 0xFF);
+  write_addr(RAM_ADDR1, addr & 0xFF);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 4 | 8);
+  write_addr(RAM_ADDR2, 0);
+}
+
+int ram_read(int addr)
+{
+  int temp;
+
+  write_addr(RAM_ADDR2, 4);  //  Disconnect CPU
+  write_addr(RAM_ADDR1, addr & 0xFF);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 4 | 16);
+  temp = read_addr(RAM_RDATA1) & 0xFF;
+  temp += (read_addr(RAM_RDATA2) & 0xFF) << 8;
+  temp += (read_addr(RAM_RDATA3) & 0xFF) << 16;
+  temp += (read_addr(RAM_RDATA4) & 0xFF) << 24;
+  write_addr(RAM_ADDR2, 0);
+  return temp;
 }
 
 ///////////////////////////////////////////////////////

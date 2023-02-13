@@ -141,9 +141,13 @@ architecture rtl of Development is
 --  Translate the physical pins into internal signals
 --
   signal addr_bus   : work.typedefs.byte;
-  signal data_in    : std_logic_vector (7 downto 0);
-  signal data_out   : std_logic_vector (7 downto 0);
-  signal data_b1    : std_logic_vector (7 downto 0);
+  signal data_in    : std_logic_vector (7 downto 0);  --  Data in from host
+  signal data_out   : std_logic_vector (7 downto 0);  --  Data out to host
+  signal data_b1    : std_logic_vector (7 downto 0);  --  Internal daisy chain bus
+  signal data_b2    : std_logic_vector (7 downto 0);  --  Internal daisy chain bus
+  signal cpu_data1  : std_logic_vector (31 downto 0);
+  signal cpu_data2  : std_logic_vector (31 downto 0);
+  signal ack_chain1 : std_logic;
   signal write_reg  : boolean;
   signal read_reg   : boolean;
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
@@ -153,6 +157,7 @@ architecture rtl of Development is
 --
   constant addr_count : natural := 0;
   constant addr_cpu   : natural := addr_count + 2;
+  constant addr_ram   : natural := addr_cpu + 14;
 begin
   --
   --  Start out with the I/O pins tri-stated.
@@ -199,8 +204,28 @@ begin
 --
   cpu32: entity work.CPU32
     generic map(location => addr_cpu)
-	 port map(data_in => data_b1, data_out => data_out,
+	 port map(data_in => data_b1, data_out => data_b2,
 	           out_enable => read_reg, set => write_reg, addr => addr_bus,
 				  clock => internal_clock);
+--
+--  Instantiate a RAM block
+--
+  ram1: entity work.ram_block
+    generic map(cpu_location => (others => '0'), host_location => addr_ram)
+    port map(cpu_data_out => (others => '0'),
+	          cpu_data_in => cpu_data1,
+				 cpu_data_next => cpu_data2,
+				 cpu_addr => (others => '0'),
+				 read_in => '0',
+				 write_in => '0',
+				 ack_in => '0',
+				 ack_out => ack_chain1,
+				 clock => internal_clock,
+				 host_data_in => data_b2,
+				 host_data_out => data_out,
+				 host_out_enable => read_reg,
+				 host_set => write_reg,
+				 host_addr => addr_bus);
+				 
 end rtl;
 
