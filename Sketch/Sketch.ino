@@ -66,16 +66,16 @@ const int CPU_ENABLES = CPU_BASE + 13;
 //
 //  RAM Control Registers
 const int RAM_BASE = CPU_BASE + 14;
-const int RAM_WDATA1 = CPU_BASE;
-const int RAM_WDATA2 = CPU_BASE + 1;
-const int RAM_WDATA3 = CPU_BASE + 2;
-const int RAM_WDATA4 = CPU_BASE + 3;
-const int RAM_RDATA1 = CPU_BASE + 4;
-const int RAM_RDATA2 = CPU_BASE + 5;
-const int RAM_RDATA3 = CPU_BASE + 6;
-const int RAM_RDATA4 = CPU_BASE + 7;
-const int RAM_ADDR1  = CPU_BASE + 8;
-const int RAM_ADDR2  = CPU_BASE + 9;
+const int RAM_WDATA1 = RAM_BASE;
+const int RAM_WDATA2 = RAM_BASE + 1;
+const int RAM_WDATA3 = RAM_BASE + 2;
+const int RAM_WDATA4 = RAM_BASE + 3;
+const int RAM_RDATA1 = RAM_BASE + 4;
+const int RAM_RDATA2 = RAM_BASE + 5;
+const int RAM_RDATA3 = RAM_BASE + 6;
+const int RAM_RDATA4 = RAM_BASE + 7;
+const int RAM_ADDR1  = RAM_BASE + 8;
+const int RAM_ADDR2  = RAM_BASE + 9;
 //
 //  Global counters for test pass and fail
 int tests  = 0;
@@ -253,7 +253,7 @@ void loop()
   test_cpu(0x80000000, 31, ALU_OP_SHR, 1, "0x80000000 SHR 31", 0);
   test_cpu(0x80000000, 32, ALU_OP_SHR, 0, "0x80000000 SHR 32", ALU_FLAG_ZERO);
   Serial.println("End of CPU tests.");
-//  dump_cpu_reg();
+  dump_cpu_reg();
   Serial.println();
   Serial.print(tests);
   Serial.print(" tests, ");

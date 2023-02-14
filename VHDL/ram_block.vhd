@@ -33,6 +33,8 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 library lpm;
 use lpm.lpm_components.all;
+library altera_mf;
+use altera_mf.altera_mf_components.all;
 
 entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
@@ -76,15 +78,31 @@ architecture rtl of ram_block is
   signal q  : std_logic_vector (31 downto 0);  --  Local data out
   signal we : std_logic;  --  Local write enable
 begin
-  ram: lpm_ram_dq
-    generic map(lpm_widthad => 10, lpm_width => 32)
-	 port map(data =>ram_data_in,
-	          address => ram_addr,
-				 we => we,
-				 q => q,
-				 inclock => clock,
-				 outclock => clock);
-  host_ram_data_out <= q;
+--  ram: lpm_ram_dq
+--    generic map(lpm_widthad => 10, lpm_width => 32)
+--	 port map(data =>ram_data_in,
+--	          address => ram_addr,
+--				 we => we,
+--				 q => q,
+--				 inclock => clock,
+--				 outclock => clock);
+  alt_ram: altsyncram
+    generic map(operation_mode => "BIDIR_DUAL_PORT",
+	             width_a   => 32,  --  Port A is for CPU
+					 widthad_a => 10,
+					 width_b   => 32,  --  Port B is for Host
+					 widthad_b => 10)
+	 port map(address_a => cpu_addr(9 downto 0),
+				 data_a => cpu_data_out,
+				 wren_a => write_in,
+				 q_a => q,
+				 address_b => host_ram_addr,
+				 data_b => host_ram_data_in,
+				 wren_b => host_write,
+				 q_b => host_ram_data_out,
+				 clock0 => clock,
+				 clock1 => clock);
+--  host_ram_data_out <= q;
 --
 --  Handle device selection.
 --
@@ -92,13 +110,16 @@ begin
   cpu_selected <= (cpu_location(31 downto 10) = cpu_addr(31 downto 10)) and not (host_disconnect_cpu = '1');
   cpu_data_in <= q when cpu_selected else
                  cpu_data_out;
-  we <= write_in when cpu_selected else host_write;
-  ram_data_in <= cpu_data_out when cpu_selected else host_ram_data_in;
-  ram_addr <= cpu_addr(9 downto 0) when cpu_selected else host_ram_addr;
+--  we <= write_in when cpu_selected else host_write;
+--  ram_data_in <= cpu_data_out when cpu_selected else host_ram_data_in;
+--  ram_addr <= cpu_addr(9 downto 0) when cpu_selected else host_ram_addr;
+  ack_out <= '1' when cpu_selected else ack_in;
 --
 --  Control process
 --
-  ram_ctrl: process(host_out_enable, host_set, host_addr, host_data_in)
+  ram_ctrl: process(host_out_enable, host_set, host_addr, host_data_in,
+    host_ram_data_in, host_ram_addr, host_disconnect_cpu, host_write, host_read,
+	 host_ram_data_out)
   begin
     case host_addr is
 	   when Wdata1_addr =>  --  Write data 1
