@@ -262,7 +262,7 @@ void loop()
   Serial.print(fails);
   Serial.println(" failed");
   Serial.println("Some simple RAM testing");
-  for (x = 16; x >= 16; x--)
+  for (x = 0; x < 16; x++)
   {
     ram_write(x, x+0xF00);
   }
@@ -450,28 +450,41 @@ void test_cpu(int op1, int op2, int func, int expected,
 //    9    R/W   Addr MSB (9-8)
 //                 4 - Enable read
 //                 3 - Enable write
-//                 2 - Disconnect CPU
+//                 2 - Clock
 //                 1 - Addr bit 9
 //                 0 - Addr bit 8
 void ram_write(int addr, int data)
 {
-  write_addr(RAM_ADDR2, 4);  //  Disconnect CPU
+  int temp;
+  write_addr(RAM_ADDR2, 0);
   write_addr(RAM_WDATA1, data & 0xFF);
   write_addr(RAM_WDATA2, (data >> 8) & 0xFF);
   write_addr(RAM_WDATA3, (data >> 16) & 0xFF);
   write_addr(RAM_WDATA4, (data >> 24) & 0xFF);
   write_addr(RAM_ADDR1, addr & 0xFF);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 0 | 8);
   write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 4 | 8);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 0 | 8);
   write_addr(RAM_ADDR2, 0);
+  temp = read_addr(RAM_WDATA1) & 0xFF;
+  temp += (read_addr(RAM_WDATA2) & 0xFF) << 8;
+  temp += (read_addr(RAM_WDATA3) & 0xFF) << 16;
+  temp += (read_addr(RAM_WDATA4) & 0xFF) << 24;
+  Serial.print("Wrote ");
+  Serial.print(temp, HEX);
+  Serial.print(" to address ");
+  Serial.println(addr, HEX);
 }
 
 int ram_read(int addr)
 {
   int temp;
 
-  write_addr(RAM_ADDR2, 4);  //  Disconnect CPU
+  write_addr(RAM_ADDR2, 0);
   write_addr(RAM_ADDR1, addr & 0xFF);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 0 | 16);
   write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 4 | 16);
+  write_addr(RAM_ADDR2, ((addr >> 8) & 0x03) | 0 | 16);
   temp = read_addr(RAM_RDATA1) & 0xFF;
   temp += (read_addr(RAM_RDATA2) & 0xFF) << 8;
   temp += (read_addr(RAM_RDATA3) & 0xFF) << 16;

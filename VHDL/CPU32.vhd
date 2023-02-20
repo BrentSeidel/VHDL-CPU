@@ -137,8 +137,8 @@ begin
 		    flags_pre <= work.typedefs.vec_to_flags(data_in);
 			 data_out <= data_in;
 	     elsif out_enable then
-		    data_out(7 downto 4) <= (others => '0');
-	       data_out(3 downto 0) <= work.typedefs.flags_to_vec(flags_post);
+		    data_out(7 downto 5) <= (others => '0');
+	       data_out(4 downto 0) <= work.typedefs.flags_to_vec(flags_post);
 		  end if;
 		when Rdata1_addr =>  --  Read data 1
 	     if (not set) and out_enable then

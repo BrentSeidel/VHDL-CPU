@@ -39,7 +39,7 @@ architecture rtl of CPU is
   signal set_psw    : std_logic;
   signal alu_flags_in  : work.typedefs.t_FLAGS;
   signal alu_flags_out : work.typedefs.t_FLAGS;
-  signal flags_to_psw  : std_logic_vector (3 downto 0);
+  signal flags_to_psw  : std_logic_vector (4 downto 0);
   signal write_mux_sel : std_logic;  --  Select source for writing to registers
   signal psw_mux_sel   : std_logic;  --  Select source for writing to PSW
 
@@ -56,7 +56,7 @@ begin
 				 current_state => state);
 
   pws_mux : work.multiplexor2
-    generic map(size => 4)
+    generic map(size => 5)
 	 port map(selector => psw_mux_sel,
 	          inp1 => work.typedefs.flags_to_vec(alu_flags_out),
 				 inp2 => work.typedefs.flags_to_vec(flags_in),

@@ -16,7 +16,8 @@ package typedefs is
     carry : std_logic;  --  Carry/borrow was genererated during operation
 	 sign  : std_logic;  --  Sign bit is set indicating negative value
 	 zero  : std_logic;  --  Result is zero
-	 error : std_logic;  --  An illegal ALU instruction was attempted since this bit was last cleared
+	 alu_error : std_logic;  --  An illegal ALU instruction was attempted since this bit was last cleared
+	 bus_error : std_logic;  --  A bus error occured
   end record t_FLAGS;
   --
   --  Some conversion functions
@@ -70,12 +71,13 @@ package body typedefs is
   end;
   --
   function flags_to_vec(flag : in t_FLAGS) return std_logic_vector is
-    variable temp : std_logic_vector(3 downto 0) := (others => '0');
+    variable temp : std_logic_vector(4 downto 0) := (others => '0');
   begin
     temp(0) := flag.carry;
 	 temp(1) := flag.sign;
 	 temp(2) := flag.zero;
-	 temp(3) := flag.error;
+	 temp(3) := flag.alu_error;
+	 temp(4) := flag.bus_error;
 	 return temp;
   end;
   --
@@ -85,7 +87,8 @@ package body typedefs is
     temp.carry := vec(0);
 	 temp.sign  := vec(1);
 	 temp.zero  := vec(2);
-	 temp.error := vec(3);
+	 temp.alu_error := vec(3);
+	 temp.bus_error := vec(4);
     return temp;
   end;
 

@@ -24,10 +24,6 @@
 --                 1 - Addr bit 9
 --                 0 - Addr bit 8
 --
---  To prevent conflict, the Disconnect CPU bit should be set
---  before the host reads and writes the RAM.
---
---  
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
@@ -39,10 +35,10 @@ use altera_mf.altera_mf_components.all;
 entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
          host_location : work.typedefs.byte);             --  Location for host registers
-  port(cpu_data_out    : in std_logic_vector (31 downto 0);  --  From CPU
+  port(cpu_data_out    : in std_logic_vector (31 downto 0);   --  From CPU
        cpu_data_in     : out std_logic_vector (31 downto 0);  --  To CPU
 		 cpu_data_next   : out std_logic_vector (31 downto 0);  --  To next device
-		 cpu_addr        : in std_logic_vector (31 downto 0);  --  From CPU
+		 cpu_addr        : in std_logic_vector (31 downto 0);   --  From CPU
 		 read_in         : in std_logic;
 		 write_in        : in std_logic;
 		 ack_in          : in std_logic;
@@ -71,54 +67,44 @@ architecture rtl of ram_block is
   signal host_ram_addr     : std_logic_vector (9 downto 0);
   signal host_write : std_logic;
   signal host_read  : std_logic;
-  signal host_disconnect_cpu : std_logic;
+  signal host_clock : std_logic;
   signal cpu_selected : boolean;
   signal ram_data_in  : std_logic_vector (31 downto 0);
   signal ram_addr : std_logic_vector (9 downto 0);
-  signal q  : std_logic_vector (31 downto 0);  --  Local data out
+  signal q  : std_logic_vector (31 downto 0);  --  Local data out port a
   signal we : std_logic;  --  Local write enable
 begin
---  ram: lpm_ram_dq
---    generic map(lpm_widthad => 10, lpm_width => 32)
---	 port map(data =>ram_data_in,
---	          address => ram_addr,
---				 we => we,
---				 q => q,
---				 inclock => clock,
---				 outclock => clock);
   alt_ram: altsyncram
     generic map(operation_mode => "BIDIR_DUAL_PORT",
 	             width_a   => 32,  --  Port A is for CPU
 					 widthad_a => 10,
 					 width_b   => 32,  --  Port B is for Host
 					 widthad_b => 10)
-	 port map(address_a => cpu_addr(9 downto 0),
+	 port map(address_a => cpu_addr(9 downto 0),  --  Port A (CPU)
 				 data_a => cpu_data_out,
 				 wren_a => write_in,
 				 q_a => q,
-				 address_b => host_ram_addr,
+				 clocken0 => '1',
+				 clock0 => clock,
+				 address_b => host_ram_addr,  --  Port B (Host)
 				 data_b => host_ram_data_in,
 				 wren_b => host_write,
 				 q_b => host_ram_data_out,
-				 clock0 => clock,
-				 clock1 => clock);
---  host_ram_data_out <= q;
+				 clocken1 => '1',
+				 clock1 => host_clock);
 --
 --  Handle device selection.
 --
   cpu_data_next <= cpu_data_out;  -- Daisy chain to next device
-  cpu_selected <= (cpu_location(31 downto 10) = cpu_addr(31 downto 10)) and not (host_disconnect_cpu = '1');
+  cpu_selected <= (cpu_location(31 downto 10) = cpu_addr(31 downto 10));
   cpu_data_in <= q when cpu_selected else
                  cpu_data_out;
---  we <= write_in when cpu_selected else host_write;
---  ram_data_in <= cpu_data_out when cpu_selected else host_ram_data_in;
---  ram_addr <= cpu_addr(9 downto 0) when cpu_selected else host_ram_addr;
   ack_out <= '1' when cpu_selected else ack_in;
 --
 --  Control process
 --
   ram_ctrl: process(host_out_enable, host_set, host_addr, host_data_in,
-    host_ram_data_in, host_ram_addr, host_disconnect_cpu, host_write, host_read,
+    host_ram_data_in, host_ram_addr, host_clock, host_write, host_read,
 	 host_ram_data_out)
   begin
     case host_addr is
@@ -185,11 +171,11 @@ begin
 		    host_ram_addr(9 downto 8) <= host_data_in(1 downto 0);
 			 host_read <= host_data_in(4);
 			 host_write <= host_data_in(3);
-			 host_disconnect_cpu <= host_data_in(2);
+			 host_clock <= host_data_in(2);
 			 host_data_out <= host_data_in;
 	     elsif host_out_enable then
 		    host_data_out(1 downto 0) <= host_ram_addr(9 downto 8);
-			 host_data_out(2) <= host_disconnect_cpu;
+			 host_data_out(2) <= host_clock;
 			 host_data_out(3) <= host_write;
 			 host_data_out(4) <= host_read;
 			 host_data_out(7 downto 5) <= (others => '0');

@@ -39,3 +39,5 @@ for std_logic and std_ulogic.
 that bidirectional busses are not a good idea.
 * Timing issues.  If you have an edge triggered signal to store data in a latch, don't use
 the same signal to select the data.
+* If things aren't working, find a way to examine the internal state.  Both in the software
+and in the FPGA.  This is many times important.

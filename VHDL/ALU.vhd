@@ -67,7 +67,7 @@ begin
 		when work.typedefs.ALU_OP_SHR =>  --  Shift right
 		  temp := std_logic_vector(shift_right(unsigned(t1), natural(to_integer(unsigned(t2)))));
       when others =>  --  This is an error condition with an unknown code
-        flags_out.error <= '1';
+        flags_out.alu_error <= '1';
         temp := (others => '0');
     end case;
     flags_out.sign <= temp(size-1);
