@@ -250,7 +250,6 @@ set_global_assignment -name VHDL_FILE Counter.vhd
 set_global_assignment -name VHDL_FILE register_file.vhd
 set_global_assignment -name VHDL_FILE CPU.vhd
 set_global_assignment -name VHDL_FILE CPU32.vhd
-set_global_assignment -name VHDL_FILE Mux.vhd
 set_global_assignment -name VHDL_FILE Sequencer.vhd
 set_global_assignment -name VHDL_FILE PWS.vhd
 set_global_assignment -name VHDL_FILE BIU.vhd

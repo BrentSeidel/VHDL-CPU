@@ -31,6 +31,7 @@ end entity CPU;
 architecture rtl of CPU is
   signal op1 : std_logic_vector (size-1 downto 0);  --  ALU Operand 1
   signal op2 : std_logic_vector (size-1 downto 0);  --  ALU Operand 2
+  signal op2_reg : std_logic_vector (size-1 downto 0);  --  Operand 2 from register
   signal res : std_logic_vector (size-1 downto 0);  --  ALU Result
   signal reg : std_logic_vector (size-1 downto 0);  --  Mux to register file
   signal enable_op1 : std_logic;
@@ -42,6 +43,7 @@ architecture rtl of CPU is
   signal flags_to_psw  : std_logic_vector (4 downto 0);
   signal write_mux_sel : std_logic;  --  Select source for writing to registers
   signal psw_mux_sel   : std_logic;  --  Select source for writing to PSW
+  signal op2_mux_sel   : std_logic;  --  Select source for op 2.
 
 begin
   sequence : work.sequencer
@@ -52,22 +54,18 @@ begin
              enable_res => enable_res,
 				 write_mux_sel => write_mux_sel,
 				 psw_mux_sel => psw_mux_sel,
+				 op2_mux_sel => op2_mux_sel,
 				 set_psw => set_psw,
 				 current_state => state);
+--
+--  Select some signals
+--
+  flags_to_psw <= work.typedefs.flags_to_vec(alu_flags_out) when psw_mux_sel = '1' else
+                  work.typedefs.flags_to_vec(flags_in);
 
-  pws_mux : work.multiplexor2
-    generic map(size => 5)
-	 port map(selector => psw_mux_sel,
-	          inp1 => work.typedefs.flags_to_vec(alu_flags_out),
-				 inp2 => work.typedefs.flags_to_vec(flags_in),
-				 out1 => flags_to_psw);
+  reg <= res when write_mux_sel = '1' else w_data;
 
-  reg_mux : work.multiplexor2
-    generic map(size => size)
-	 port map(selector => write_mux_sel,
-	          inp1 => res,
-				 inp2 => w_data,
-				 out1 => reg);
+  op2 <= op2_reg when op2_mux_sel = '0' else std_logic_vector(to_unsigned(1, size));
 
   reg_file :  work.register_file
     generic map(count => count, size => size)
@@ -75,7 +73,7 @@ begin
              r_data1 => op1,      --  Internal
              r_en1   => enable_op1,
              r_addr2 => r_addr2,
-             r_data2 => op2,      --  Internal
+             r_data2 => op2_reg,  --  Internal
              r_en2   => enable_op2,
              r_addr3 => r_addr3,
              r_data3 => r_data3,
