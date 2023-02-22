@@ -18,8 +18,8 @@ learning VHDL.  Expect there to be various dead ends and bad ideas.
 These will hopefully be replaced by better ideas as time goes on.
 
 There are two main components in this repository:
-1 An Arduino sketch to load and test the designing
-2 The VHDL code for the CPU.
+1. An Arduino sketch to load and test the designing
+2. The VHDL code for the CPU.
 
 ## Documentation
 I'm starting to write some simple documentation.  Most of it should be linked from this
@@ -41,3 +41,12 @@ that bidirectional busses are not a good idea.
 the same signal to select the data.
 * If things aren't working, find a way to examine the internal state.  Both in the software
 and in the FPGA.  This is many times important.
+
+## Roadmap
+This is more or less what I see that needs to be done to get to a working CPU.  This list will
+probably be rather dynamic with things being added and deleted as work progresses.
+* Currently working on preparations to add the bus interface to the CPU
+* Get the CPU to be able to talk to the RAM module
+* Preparations for instruction decoder
+* Add instruction decoder
+* Start implementing instructions

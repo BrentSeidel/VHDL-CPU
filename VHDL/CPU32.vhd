@@ -24,6 +24,7 @@ use ieee.std_logic_unsigned.all ;
 --   11    R/W   ALU function
 --   12    R/W   ALU flags
 --   13    R/W   Enables
+--                 4 - Select Op 2 as 1
 --                 3 - Enable flags
 --                 2 - Enable read
 --                 1 - Enable write
@@ -63,6 +64,7 @@ architecture rtl of CPU32 is
   signal raddr3         : natural range 0 to (2**count)-1;
   signal waddr          : natural range 0 to (2**count)-1;
   signal start          : std_logic;
+  signal incdec         : std_logic;
   signal enable_read    : std_logic;
   signal enable_write   : std_logic;
   signal func_value     : work.typedefs.byte;
@@ -77,6 +79,7 @@ begin
   port map (
        clock => clock,
 		 start => start,
+		 incdec => incdec,
 		 state => state,
        r_addr1   => raddr1,     --  Read port 1
 		 r_addr2   => raddr2,     --  Read port 2
@@ -190,6 +193,7 @@ begin
 		  end if;
 		when enable_addr =>  --  Enable/control bits
         if set then
+		    incdec       <= data_in(4);
 		    flags_en     <= data_in(3);
 		    enable_read  <= data_in(2);
 		    enable_write <= data_in(1);
@@ -197,7 +201,7 @@ begin
 			 data_out <= data_in;
 	     elsif out_enable then
 		    data_out <= (0 => start, 1 => enable_write, 2 => enable_read,
-			              3 => flags_en, others => '0');
+			              3 => flags_en, 4 => incdec, others => '0');
 		  end if;
       when others =>
 	     data_out <= data_in;

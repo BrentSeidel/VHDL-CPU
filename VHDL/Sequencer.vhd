@@ -15,6 +15,7 @@ use ieee.Numeric_Std.all;
 entity sequencer is
   port(clock : in std_logic;
        start : in std_logic;
+		 incdec : in std_logic;
 		 enable_op1 : out std_logic;
 		 enable_op2 : out std_logic;
 		 enable_res : out std_logic;
@@ -26,8 +27,7 @@ entity sequencer is
 end entity sequencer;
 
 architecture rtl of sequencer is
-  type states is (state_null, state_read_op, state_write_res, state_final,
-                  state_incr);
+  type states is (state_null, state_read_op, state_write_res, state_final);
   signal state : states := state_null;
   signal next_state : states := state_null;
 begin
@@ -69,16 +69,7 @@ begin
 		  enable_res <= '0';
 		  write_mux_sel <= '1';
 		  psw_mux_sel <= '1';
-		  op2_mux_sel <= '0';
-		  set_psw <= '0';
-		  next_state <= state_write_res;
-		when state_incr =>  --  Prepare for an increment
-		  enable_op1 <= '1';
-		  enable_op2 <= '1';
-		  enable_res <= '0';
-		  write_mux_sel <= '1';
-		  psw_mux_sel <= '1';
-		  op2_mux_sel <= '1';
+	     op2_mux_sel <= incdec;
 		  set_psw <= '0';
 		  next_state <= state_write_res;
 		when state_write_res =>  --  Write result from the ALU
@@ -87,7 +78,7 @@ begin
 		  enable_res <= '1';
 		  write_mux_sel <= '1';
 		  psw_mux_sel <= '1';
-		  op2_mux_sel <= '0';
+	     op2_mux_sel <= incdec;
 		  set_psw <= '1';
 		  if start = '0' then
 		    next_state <= state_null;

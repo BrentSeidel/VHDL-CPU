@@ -13,6 +13,7 @@ entity CPU is
   generic(count : natural; size : natural);
   port(clock   : in std_logic;
        start   : in std_logic;
+		 incdec  : in std_logic;
 		 state   : out std_logic_vector(3 downto 0);
        r_addr1 : in natural range 0 to (2**count)-1;
 		 r_addr2 : in natural range 0 to (2**count)-1;
@@ -46,17 +47,6 @@ architecture rtl of CPU is
   signal op2_mux_sel   : std_logic;  --  Select source for op 2.
 
 begin
-  sequence : work.sequencer
-    port map(clock => clock,
-	          start => start,
-             enable_op1 => enable_op1,
-             enable_op2 => enable_op2,
-             enable_res => enable_res,
-				 write_mux_sel => write_mux_sel,
-				 psw_mux_sel => psw_mux_sel,
-				 op2_mux_sel => op2_mux_sel,
-				 set_psw => set_psw,
-				 current_state => state);
 --
 --  Select some signals
 --
@@ -66,6 +56,21 @@ begin
   reg <= res when write_mux_sel = '1' else w_data;
 
   op2 <= op2_reg when op2_mux_sel = '0' else std_logic_vector(to_unsigned(1, size));
+--
+--  Logic Blocks
+--
+  sequence : work.sequencer
+    port map(clock => clock,
+	          start => start,
+				 incdec => incdec,
+             enable_op1 => enable_op1,
+             enable_op2 => enable_op2,
+             enable_res => enable_res,
+				 write_mux_sel => write_mux_sel,
+				 psw_mux_sel => psw_mux_sel,
+				 op2_mux_sel => op2_mux_sel,
+				 set_psw => set_psw,
+				 current_state => state);
 
   reg_file :  work.register_file
     generic map(count => count, size => size)
