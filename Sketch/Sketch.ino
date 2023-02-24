@@ -105,6 +105,7 @@ void dump_cpu_reg();
 void set_flags(int flags);
 void test_cpu(int op1, int op2, int func, int expected,
               const char *name, int flg);
+void test_incdec(int reg, int dir);
 void ram_write(int addr, int data);
 int ram_read(int addr);
 
@@ -268,6 +269,11 @@ void loop()
   test_cpu(21, 40, ALU_OP_ADD, CTRL_OP2_1, 22, "21 ADD 1", 0);
   test_cpu(31, 20, ALU_OP_SUB, CTRL_OP2_1, 30, "31 SUB 1", 0);
   test_cpu(20, 31, ALU_OP_SUB, CTRL_OP2_1, 19, "20 SUB 1", 0);
+  test_incdec(3, 1);
+  test_incdec(15, 1);
+  test_incdec(3, -1);
+  test_incdec(14, -1);
+  test_incdec(14, 1);
 
   Serial.println("End of CPU tests.");
   dump_cpu_reg();
@@ -452,6 +458,60 @@ void test_cpu(int op1, int op2, int func, int incdec, int expected,
   Serial.print(", Flags ");
   test_cpu_flags(flg);
 }
+
+void test_incdec(int reg, int dir)
+{
+  int old_value;
+  int new_value;
+
+  tests++;
+  write_addr(CPU_ENABLES, CTRL_NONE);
+  old_value = cpu_read_reg(reg);
+  Serial.print("Old value: ");
+  Serial.print(old_value, HEX);
+  write_addr(CPU_RADDR12, ((reg & 0xF) << 4) | (reg & 0xF));
+  write_addr(CPU_WADDR12, reg & 0xF);
+  if (dir > 0)
+  {
+    write_addr(CPU_FUNCT, ALU_OP_ADD);
+  }
+  else
+  {
+    write_addr(CPU_FUNCT, ALU_OP_SUB);
+  }
+  write_addr(CPU_ENABLES, CTRL_OP2_1 + CTRL_START);
+  write_addr(CPU_ENABLES, CTRL_NONE);
+  new_value = cpu_read_reg(reg);
+  Serial.print(", new value ");
+  Serial.print(new_value, HEX);
+  if (dir > 0)
+  {
+    if (new_value == (old_value + 1))
+    {
+      Serial.println("  Pass");
+      passes++;
+    }
+    else
+    {
+      Serial.println("  FAIL!");
+      fails++;
+    }
+  }
+  else
+  {
+    if (new_value == (old_value - 1))
+    {
+      Serial.println("  Pass");
+      passes++;
+    }
+    else
+    {
+      Serial.println("  FAIL!");
+      fails++;
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////
 //
 //  Define some functions to access the FPGA RAM block

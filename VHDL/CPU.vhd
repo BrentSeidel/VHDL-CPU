@@ -22,7 +22,7 @@ entity CPU is
 		 r_en3   : in std_logic;
 		 w_addr  : in natural range 0 to (2**count)-1;
 		 w_data  : in std_logic_vector (size-1 downto 0);
-		 w_en2   : in std_logic;  --  Write external data
+		 host_write : in std_logic;  --  Write external data
        funct     : in work.typedefs.byte;
 		 flags_en  : in std_logic;  --  Write flags
        flags_in  : in work.typedefs.t_FLAGS;
@@ -42,7 +42,6 @@ architecture rtl of CPU is
   signal alu_flags_in  : work.typedefs.t_FLAGS;
   signal alu_flags_out : work.typedefs.t_FLAGS;
   signal flags_to_psw  : std_logic_vector (4 downto 0);
-  signal write_mux_sel : std_logic;  --  Select source for writing to registers
   signal psw_mux_sel   : std_logic;  --  Select source for writing to PSW
   signal op2_mux_sel   : std_logic;  --  Select source for op 2.
 
@@ -53,23 +52,26 @@ begin
   flags_to_psw <= work.typedefs.flags_to_vec(alu_flags_out) when psw_mux_sel = '1' else
                   work.typedefs.flags_to_vec(flags_in);
 
-  reg <= res when write_mux_sel = '1' else w_data;
-
   op2 <= op2_reg when op2_mux_sel = '0' else std_logic_vector(to_unsigned(1, size));
 --
 --  Logic Blocks
 --
   sequence : work.sequencer
+    generic map(count => count, size => size)
     port map(clock => clock,
 	          start => start,
 				 incdec => incdec,
+				 host_write => host_write,
+				 host_data => w_data,
+				 alu_data => res,
+				 flags_en => flags_en,
              enable_op1 => enable_op1,
              enable_op2 => enable_op2,
              enable_res => enable_res,
-				 write_mux_sel => write_mux_sel,
 				 psw_mux_sel => psw_mux_sel,
 				 op2_mux_sel => op2_mux_sel,
 				 set_psw => set_psw,
+				 write_data => reg,
 				 current_state => state);
 
   reg_file :  work.register_file
@@ -85,10 +87,10 @@ begin
              r_en3   => r_en3,
              w_addr  => w_addr,
              w_data  => reg,       --  From mux
-             w_en    => (enable_res or w_en2));
+             w_en    => enable_res);
 
   psw : work.psw
-    port map(set_value => set_psw or flags_en,
+    port map(set_value => set_psw,
 	          flags_in  => work.typedefs.vec_to_flags(flags_to_psw),
 	          flags_out => alu_flags_in);
 

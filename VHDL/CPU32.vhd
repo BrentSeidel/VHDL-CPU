@@ -88,7 +88,7 @@ begin
 		 r_en3     => enable_read,
 		 w_addr    => waddr,
 		 w_data    => write_bus,
-		 w_en2     => enable_write,
+		 host_write => enable_write,
        funct     => func_value, --  ALU Function
 		 flags_en  => flags_en,     --  Set ALU flags
        flags_in  => flags_pre,    --  ALU Flags in
