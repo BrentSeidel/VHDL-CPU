@@ -140,7 +140,6 @@ architecture rtl of Development is
 --
 --  Translate the physical pins into internal signals
 --
-  signal addr_bus   : work.typedefs.byte;
   signal data_in    : std_logic_vector (7 downto 0);  --  Data in from host
   signal data_out   : std_logic_vector (7 downto 0);  --  Data out to host
   signal data_b1    : std_logic_vector (7 downto 0);  --  Internal daisy chain bus
@@ -148,10 +147,9 @@ architecture rtl of Development is
   signal cpu_data1  : std_logic_vector (31 downto 0);
   signal cpu_data2  : std_logic_vector (31 downto 0);
   signal ack_chain1 : std_logic;
-  signal write_reg  : boolean;
-  signal read_reg   : boolean;
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
   signal internal_clock : std_logic;
+  signal host       : work.typedefs.host_bus_ctrl;
 --
 --  Some constants for register base addresses
 --
@@ -185,12 +183,11 @@ begin
   --
   --  Read signals from inputs and route to internal buses
   --
-  addr_bus <= work.typedefs.vec_to_byte(bMKR_D(14 downto 8));
-  write_reg <= (bMKR_A(0) = '1');
-  read_reg  <= (bMKR_A(1) = '1');
   slow_clock <= bMKR_A(2);
   data_in <= bMKR_D(7 downto 0);
-  bMKR_D(7 downto 0) <= data_out when (not write_reg) and read_reg else
+  host <= (cmd_read => (bMKR_A(1) = '1'), cmd_write => (bMKR_A(0) = '1'),
+           addr => work.typedefs.vec_to_byte(bMKR_D(14 downto 8)));
+  bMKR_D(7 downto 0) <= data_out when (not host.cmd_write) and host.cmd_read else
                         (others => 'Z');
 --
 --  Instantiate the counter entity
@@ -198,15 +195,14 @@ begin
   counter: entity work.Counter
     generic map(location => addr_count)
 	 port map(data_in => data_in, data_out => data_b1,
-	           out_enable => read_reg, set => write_reg, addr => addr_bus, clock => internal_clock);
+	           host => host, clock => internal_clock);
 --
 --  Instantiate the CPU and test system
 --
   cpu32: entity work.CPU32
     generic map(location => addr_cpu)
 	 port map(data_in => data_b1, data_out => data_b2,
-	           out_enable => read_reg, set => write_reg, addr => addr_bus,
-				  clock => internal_clock);
+	           host => host, clock => internal_clock);
 --
 --  Instantiate a RAM block
 --
@@ -223,9 +219,7 @@ begin
 				 clock => internal_clock,
 				 host_data_in => data_b2,
 				 host_data_out => data_out,
-				 host_out_enable => read_reg,
-				 host_set => write_reg,
-				 host_addr => addr_bus);
+				 host => host);
 				 
 end rtl;
 

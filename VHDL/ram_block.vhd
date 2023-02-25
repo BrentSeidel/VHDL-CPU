@@ -46,9 +46,7 @@ entity ram_block is
 		 clock           : in std_logic;
 		 host_data_in    : in std_logic_vector (7 downto 0);
        host_data_out   : out std_logic_vector (7 downto 0);
-       host_out_enable : in boolean;
-	    host_set        : in boolean;
-	    host_addr       : in work.typedefs.byte);
+		 host            : in work.typedefs.host_bus_ctrl);
 end ram_block;
 
 architecture rtl of ram_block is
@@ -103,77 +101,76 @@ begin
 --
 --  Control process
 --
-  ram_ctrl: process(host_out_enable, host_set, host_addr, host_data_in,
-    host_ram_data_in, host_ram_addr, host_clock, host_write, host_read,
-	 host_ram_data_out)
+  ram_ctrl: process(host, host_data_in, host_ram_data_in, host_ram_addr,
+    host_clock, host_write, host_read, host_ram_data_out)
   begin
-    case host_addr is
+    case host.addr is
 	   when Wdata1_addr =>  --  Write data 1
-        if host_set then
+        if host.cmd_write then
 	       host_ram_data_in(7 downto 0) <= host_data_in;
 			 host_data_out <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 	       host_data_out <= host_ram_data_in(7 downto 0);
 		  end if;
 	   when Wdata2_addr =>  --  Write data 2
-        if host_set then
+        if host.cmd_write then
 	       host_ram_data_in(15 downto 8) <= host_data_in;
 			 host_data_out <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 	       host_data_out <= host_ram_data_in(15 downto 8);
 		  end if;
 	   when Wdata3_addr =>  --  Write data 3
-        if host_set then
+        if host.cmd_write then
 	       host_ram_data_in(23 downto 16) <= host_data_in;
 			 host_data_out <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 	       host_data_out <= host_ram_data_in(23 downto 16);
 		  end if;
 	   when Wdata4_addr =>  --  Write data 4
-        if host_set then
+        if host.cmd_write then
 	       host_ram_data_in(31 downto 24) <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 	       host_data_out <= host_ram_data_in(31 downto 24);
 		  end if;
 		when Rdata1_addr =>  --  Read data 1
-	     if (not host_set) and host_out_enable then
+	     if (not host.cmd_write) and host.cmd_read then
 	       host_data_out <= host_ram_data_out(7 downto 0);
 		  else
 			 host_data_out <= host_data_in;
 		  end if;
 		when Rdata2_addr =>  --  Read data 2
-	     if (not host_set) and host_out_enable then
+	     if (not host.cmd_write) and host.cmd_read then
 	       host_data_out <= host_ram_data_out(15 downto 8);
 		  else
 			 host_data_out <= host_data_in;
 		  end if;
 		when Rdata3_addr =>  --  Read data 3
-	     if (not host_set) and host_out_enable then
+	     if (not host.cmd_write) and host.cmd_read then
 	       host_data_out <= host_ram_data_out(23 downto 16);
 		  else
 			 host_data_out <= host_data_in;
 		  end if;
 		when Rdata4_addr =>  --  Read data 4
-	     if (not host_set) and host_out_enable then
+	     if (not host.cmd_write) and host.cmd_read then
 	       host_data_out <= host_ram_data_out(31 downto 24);
 		  else
 			 host_data_out <= host_data_in;
 		  end if;
 		when Addr1_addr =>  --  Write register address
-        if host_set then
+        if host.cmd_write then
 		    host_ram_addr(7 downto 0) <= host_data_in;
 			 host_data_out <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 		    host_data_out <= host_ram_addr(7 downto 0);
 		  end if;
 		when Addr2_addr =>  --  Write register address
-        if host_set then
+        if host.cmd_write then
 		    host_ram_addr(9 downto 8) <= host_data_in(1 downto 0);
 			 host_read <= host_data_in(4);
 			 host_write <= host_data_in(3);
 			 host_clock <= host_data_in(2);
 			 host_data_out <= host_data_in;
-	     elsif host_out_enable then
+	     elsif host.cmd_read then
 		    host_data_out(1 downto 0) <= host_ram_addr(9 downto 8);
 			 host_data_out(2) <= host_clock;
 			 host_data_out(3) <= host_write;
@@ -183,7 +180,7 @@ begin
       when others =>  --  Not being addressed
 	     host_data_out <= host_data_in;
     end case;		
-	 if (not host_set) and (not host_out_enable) then
+	 if (not host.cmd_write) and (not host.cmd_read) then
       host_data_out <= host_data_in;
 	 end if;
   end process ram_ctrl;

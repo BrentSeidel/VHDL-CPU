@@ -12,6 +12,9 @@ package typedefs is
 --  Define some types
 --
   subtype byte is integer range 0 to 255;
+--
+--  Processor status word
+--
   type t_FLAGS is record
     carry : std_logic;  --  Carry/borrow was genererated during operation
 	 sign  : std_logic;  --  Sign bit is set indicating negative value
@@ -19,6 +22,14 @@ package typedefs is
 	 alu_error : std_logic;  --  An illegal ALU instruction was attempted since this bit was last cleared
 	 bus_error : std_logic;  --  A bus error occured
   end record t_FLAGS;
+--
+--  Host bus types
+--
+  type host_bus_ctrl is record
+    cmd_read  : boolean;  --  Read from device
+	 cmd_write : boolean;  --  Write to device
+	 addr      : work.typedefs.byte;
+  end record;
   --
   --  Some conversion functions
   --
