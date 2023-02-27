@@ -36,8 +36,7 @@ entity CPU32 is
         data_out : out std_logic_vector (7 downto 0);
         host  : in work.typedefs.host_bus_ctrl;
 		  cpu_bus : out work.typedefs.cpu_bus_ctrl;
-		  bus_data : in std_logic_vector (31 downto 0);
-		  bus_ack : in std_logic;
+		  cpu_bus_ret : in work.typedefs.cpu_bus_ret;
 		  clock : in std_logic);
 end entity CPU32;
 
@@ -92,8 +91,7 @@ begin
 		 host_write => enable_write,
        funct     => func_value, --  ALU Function
 		 cpu_bus   => cpu_bus,
-		 bus_data_in_ext => bus_data,
-		 bus_ack   => bus_ack,
+		 cpu_bus_ret => cpu_bus_ret,
 		 flags_en  => flags_en,     --  Set ALU flags
        flags_in  => flags_pre,    --  ALU Flags in
        flags_out => flags_post);  --  ALU Flags out

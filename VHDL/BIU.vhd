@@ -23,15 +23,14 @@ entity bus_interface is
   generic(addr_size : natural; data_size : natural);
   port(clock        : in std_logic;
        cpu_bus      : out work.typedefs.cpu_bus_ctrl;
+		 cpu_bus_ret  : in work.typedefs.cpu_bus_ret;
        data_in_int  : in std_logic_vector (data_size-1 downto 0);
        data_out_int : out std_logic_vector (data_size-1 downto 0);
-       data_in_ext  : in std_logic_vector (data_size-1 downto 0);
 		 addr_in_int  : in std_logic_vector (addr_size-1 downto 0);
 		 read_int     : in std_logic;  --  Request from CPU to read
 		 write_int    : in std_logic;  --  Request from CPU to write
 		 busy         : out std_logic;  --  Tell CPU request in progress
-		 ready        : out std_logic;  --  Tell CPU read data is ready
-		 ack          : in std_logic);  --  Ack from external device
+		 ready        : out std_logic);  --  Tell CPU read data is ready
 --
 end entity;
 
@@ -75,7 +74,7 @@ begin
 		  next_state <= state_read_wait;
 		when state_read_wait =>  --  Finish a read request
 		  if ack = '1' then
-		    data_out_int <= data_in_ext;
+		    data_out_int <= cpu_bus_ret.data;
 			 ready <= '1';
 			 next_state <= state_null;
 		  else

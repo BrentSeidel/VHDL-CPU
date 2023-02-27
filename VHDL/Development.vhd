@@ -151,6 +151,7 @@ architecture rtl of Development is
   signal internal_clock : std_logic;
   signal host       : work.typedefs.host_bus_ctrl;
   signal cpu_bus    : work.typedefs.cpu_bus_ctrl;
+  signal cpu_bus_ret1 : work.typedefs.cpu_bus_ret;
 --
 --  Some constants for register base addresses
 --
@@ -205,8 +206,7 @@ begin
 	 port map(data_in => data_b1, data_out => data_b2,
 	           host => host,
 				  cpu_bus => cpu_bus,
-		        bus_data => (others => '0'),
-		        bus_ack => '0',
+				  cpu_bus_ret => cpu_bus_ret1,
 				  clock => internal_clock);
 --
 --  Instantiate a RAM block
@@ -214,14 +214,8 @@ begin
   ram1: entity work.ram_block
     generic map(cpu_location => (others => '0'), host_location => addr_ram)
     port map(cpu_bus => cpu_bus,
---	          cpu_data_out => (others => '0'),
-	          cpu_data_in => cpu_data1,
-				 cpu_data_chain => cpu_data2,
---				 cpu_addr => (others => '0'),
---				 read_in => '0',
---				 write_in => '0',
-				 ack_in => '0',
-				 ack_out => ack_chain1,
+	          cpu_ret_out => cpu_bus_ret1,
+				 cpu_ret_in => (data => (others => '0'), ack => '0'),
 				 clock => internal_clock,
 				 host_data_in => data_b2,
 				 host_data_out => data_out,

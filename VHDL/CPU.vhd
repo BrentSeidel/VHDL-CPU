@@ -25,8 +25,7 @@ entity CPU is
 		 host_write : in std_logic;  --  Write external data
        funct     : in work.typedefs.byte;
 		 cpu_bus   : out work.typedefs.cpu_bus_ctrl;
-		 bus_data_in_ext  : in std_logic_vector (size-1 downto 0);
-		 bus_ack   : in std_logic;  --  Bus acknowlege
+		 cpu_bus_ret : in work.typedefs.cpu_bus_ret;
 		 flags_en  : in std_logic;  --  Write flags
        flags_in  : in work.typedefs.t_FLAGS;
        flags_out : out work.typedefs.t_FLAGS);
@@ -120,13 +119,12 @@ begin
     generic map(addr_size => size, data_size => size)
 	 port map(clock => clock,
 	          cpu_bus => cpu_bus,
+				 cpu_bus_ret => cpu_bus_ret,
 				 data_in_int => op1,
 				 data_out_int => bus_data_in_int,
-				 data_in_ext => bus_data_in_ext,
 				 addr_in_int => op2_reg,
 				 read_int => read_cmd,
 				 write_int => write_cmd,
 				 busy => bus_busy,
-				 ready => bus_ready,
-				 ack => bus_ack);
+				 ready => bus_ready);
 end rtl;

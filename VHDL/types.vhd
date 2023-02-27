@@ -45,6 +45,13 @@ package typedefs is
 	 read_cmd  : std_logic;  --  Output read 
 	 write_cmd : std_logic;  --  Output write
   end record;
+--
+--  CPU bus daisy chain return
+--
+  type cpu_bus_ret is record
+    data : std_logic_vector(31 downto 0);
+	 ack  : std_logic;
+  end record;
   --
   --  Some conversion functions
   --

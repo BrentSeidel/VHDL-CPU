@@ -3,10 +3,10 @@ This provides notes on the CPU bus operation.
 * Some of the bus signals are daisy-chained, thus each node passes signals to the next node.
 * If a node is selected, it should not pass anything to the next node.
 * Currently, the CPU is the only bus masters.
-* Daisy chained signals include the following:
+* Daisy chained signals include the following (in structure cpu_bus_ret):
 	* Data to CPU
 	* Request acknowlege (to CPU)
-* Non-Daisy chained signals include the following:
+* Non-Daisy chained signals include the following (in structure cpu_bus_ctrl):
     * Address (from CPU)
     * Data from CPU
 	* Read request (from CPU)

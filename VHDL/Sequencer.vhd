@@ -3,8 +3,11 @@
 --  expected that there will be lots of changes here as the
 --  CPU develops.
 --
---  Phase I just provides signals to read from registers to
+--  Phase 1 just provides signals to read from registers to
 --  the ALU and write the results back.
+--
+--  Phase 2 adds control of the CPU bus to read and write to/from
+--  RAM.
 --
 library ieee;
 

@@ -51,3 +51,4 @@ probably be rather dynamic with things being added and deleted as work progresse
 * Preparations for instruction decoder
 * Add instruction decoder
 * Start implementing instructions
+* Work on an interface to the SDRAM chip

@@ -36,14 +36,8 @@ entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
          host_location : work.typedefs.byte);             --  Location for host registers
   port(cpu_bus   : in work.typedefs.cpu_bus_ctrl;
---       cpu_data_out    : in std_logic_vector (31 downto 0);  --  From CPU
-       cpu_data_in     : in std_logic_vector (31 downto 0);    --  From previous device
-		 cpu_data_chain  : out std_logic_vector (31 downto 0);   --  To next device
---		 cpu_addr        : in std_logic_vector (31 downto 0);    --  From CPU
---		 read_in         : in std_logic;
---		 write_in        : in std_logic;
-		 ack_in          : in std_logic;
-		 ack_out         : out std_logic;
+       cpu_ret_in      : in work.typedefs.cpu_bus_ret;
+		 cpu_ret_out     : out work.typedefs.cpu_bus_ret;
 		 clock           : in std_logic;
 		 host_data_in    : in std_logic_vector (7 downto 0);
        host_data_out   : out std_logic_vector (7 downto 0);
@@ -94,11 +88,9 @@ begin
 --
 --  Handle device selection.
 --
---  cpu_data_chain <= cpu_data_in;  -- Daisy chain to next device
   cpu_selected <= (cpu_location(31 downto 10) = cpu_bus.addr(31 downto 10));
-  cpu_data_chain <= q when cpu_selected else
-                 cpu_data_in;
-  ack_out <= '1' when cpu_selected else ack_in;
+  cpu_ret_out <= (data => q, ack => '1') when cpu_selected else
+                 cpu_ret_in;
 --
 --  Control process
 --
