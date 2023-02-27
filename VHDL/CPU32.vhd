@@ -34,7 +34,10 @@ entity CPU32 is
   generic (location : work.typedefs.byte);
   port (data_in  : in std_logic_vector (7 downto 0);
         data_out : out std_logic_vector (7 downto 0);
-        host  : work.typedefs.host_bus_ctrl;
+        host  : in work.typedefs.host_bus_ctrl;
+		  cpu_bus : out work.typedefs.cpu_bus_ctrl;
+		  bus_data : in std_logic_vector (31 downto 0);
+		  bus_ack : in std_logic;
 		  clock : in std_logic);
 end entity CPU32;
 
@@ -88,6 +91,9 @@ begin
 		 w_data    => write_bus,
 		 host_write => enable_write,
        funct     => func_value, --  ALU Function
+		 cpu_bus   => cpu_bus,
+		 bus_data_in_ext => bus_data,
+		 bus_ack   => bus_ack,
 		 flags_en  => flags_en,     --  Set ALU flags
        flags_in  => flags_pre,    --  ALU Flags in
        flags_out => flags_post);  --  ALU Flags out

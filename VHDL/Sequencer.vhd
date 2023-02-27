@@ -20,7 +20,10 @@ entity sequencer is
 		 host_write   : in std_logic;  --  Host request to write data
 		 host_data    : in std_logic_vector (size-1 downto 0);
 		 alu_data     : in std_logic_vector (size-1 downto 0);
+		 bus_data     : in std_logic_vector (size-1 downto 0);
 		 flags_en     : in std_logic;  --  Host request to write psw
+		 read_cmd      : out std_logic;
+		 write_cmd     : out std_logic;
 		 enable_op1    : out std_logic;
 		 enable_op2    : out std_logic;
 		 enable_res    : out std_logic;
@@ -51,7 +54,7 @@ begin
   --
   --  Compute what the next state should be and set output signals.
   --
-  state_machine: process(state, start, host_write, flags_en, host_data, alu_data)
+  state_machine: process(state, start, host_write, flags_en, host_data, bus_data, alu_data)
   begin
     case state is
 	   when state_null =>  --  Wait for start signal to go high

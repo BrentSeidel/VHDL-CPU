@@ -24,6 +24,9 @@ entity CPU is
 		 w_data  : in std_logic_vector (size-1 downto 0);
 		 host_write : in std_logic;  --  Write external data
        funct     : in work.typedefs.byte;
+		 cpu_bus   : out work.typedefs.cpu_bus_ctrl;
+		 bus_data_in_ext  : in std_logic_vector (size-1 downto 0);
+		 bus_ack   : in std_logic;  --  Bus acknowlege
 		 flags_en  : in std_logic;  --  Write flags
        flags_in  : in work.typedefs.t_FLAGS;
        flags_out : out work.typedefs.t_FLAGS);
@@ -35,10 +38,15 @@ architecture rtl of CPU is
   signal op2_reg : std_logic_vector (size-1 downto 0);  --  Operand 2 from register
   signal res : std_logic_vector (size-1 downto 0);  --  ALU Result
   signal reg : std_logic_vector (size-1 downto 0);  --  Mux to register file
+  signal bus_data_in_int : std_logic_vector (size-1 downto 0);  --  Data from BIU
   signal enable_op1 : std_logic;
   signal enable_op2 : std_logic;
   signal enable_res : std_logic;
   signal set_psw    : std_logic;
+  signal read_cmd   : std_logic;
+  signal write_cmd  : std_logic;
+  signal bus_busy   : std_logic;
+  signal bus_ready  : std_logic;
   signal alu_flags_in  : work.typedefs.t_FLAGS;
   signal alu_flags_out : work.typedefs.t_FLAGS;
   signal flags_to_psw  : std_logic_vector (4 downto 0);
@@ -56,7 +64,7 @@ begin
 --
 --  Logic Blocks
 --
-  sequence : work.sequencer
+  sequencer : work.sequencer
     generic map(count => count, size => size)
     port map(clock => clock,
 	          start => start,
@@ -64,7 +72,10 @@ begin
 				 host_write => host_write,
 				 host_data => w_data,
 				 alu_data => res,
+				 bus_data => bus_data_in_int,
 				 flags_en => flags_en,
+				 read_cmd => read_cmd,
+				 write_cmd => write_cmd,
              enable_op1 => enable_op1,
              enable_op2 => enable_op2,
              enable_res => enable_res,
@@ -73,7 +84,7 @@ begin
 				 set_psw => set_psw,
 				 write_data => reg,
 				 current_state => state);
-
+--
   reg_file :  work.register_file
     generic map(count => count, size => size)
 	 port map(r_addr1 => r_addr1, 
@@ -88,14 +99,14 @@ begin
              w_addr  => w_addr,
              w_data  => reg,       --  From mux
              w_en    => enable_res);
-
+--
   psw : work.psw
     port map(set_value => set_psw,
 	          flags_in  => work.typedefs.vec_to_flags(flags_to_psw),
 	          flags_out => alu_flags_in);
-
+--
   flags_out <= alu_flags_in;
-				 
+--
   alu : work.alu
     generic map(size => size)
 	 port map(op1       => op1,
@@ -104,4 +115,18 @@ begin
 	          funct     => funct,  --  External
 				 flags_in  => alu_flags_in,
 				 flags_out => alu_flags_out);
+--
+  biu : work.bus_interface
+    generic map(addr_size => size, data_size => size)
+	 port map(clock => clock,
+	          cpu_bus => cpu_bus,
+				 data_in_int => op1,
+				 data_out_int => bus_data_in_int,
+				 data_in_ext => bus_data_in_ext,
+				 addr_in_int => op2_reg,
+				 read_int => read_cmd,
+				 write_int => write_cmd,
+				 busy => bus_busy,
+				 ready => bus_ready,
+				 ack => bus_ack);
 end rtl;

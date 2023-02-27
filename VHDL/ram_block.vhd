@@ -35,12 +35,13 @@ use altera_mf.altera_mf_components.all;
 entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
          host_location : work.typedefs.byte);             --  Location for host registers
-  port(cpu_data_out    : in std_logic_vector (31 downto 0);   --  From CPU
-       cpu_data_in     : out std_logic_vector (31 downto 0);  --  To CPU
-		 cpu_data_next   : out std_logic_vector (31 downto 0);  --  To next device
-		 cpu_addr        : in std_logic_vector (31 downto 0);   --  From CPU
-		 read_in         : in std_logic;
-		 write_in        : in std_logic;
+  port(cpu_bus   : in work.typedefs.cpu_bus_ctrl;
+--       cpu_data_out    : in std_logic_vector (31 downto 0);  --  From CPU
+       cpu_data_in     : in std_logic_vector (31 downto 0);    --  From previous device
+		 cpu_data_chain  : out std_logic_vector (31 downto 0);   --  To next device
+--		 cpu_addr        : in std_logic_vector (31 downto 0);    --  From CPU
+--		 read_in         : in std_logic;
+--		 write_in        : in std_logic;
 		 ack_in          : in std_logic;
 		 ack_out         : out std_logic;
 		 clock           : in std_logic;
@@ -78,9 +79,9 @@ begin
 					 widthad_a => 10,
 					 width_b   => 32,  --  Port B is for Host
 					 widthad_b => 10)
-	 port map(address_a => cpu_addr(9 downto 0),  --  Port A (CPU)
-				 data_a => cpu_data_out,
-				 wren_a => write_in,
+	 port map(address_a => cpu_bus.addr(9 downto 0),  --  Port A (CPU)
+				 data_a => cpu_bus.data,
+				 wren_a => cpu_bus.write_cmd,
 				 q_a => q,
 				 clocken0 => '1',
 				 clock0 => clock,
@@ -93,10 +94,10 @@ begin
 --
 --  Handle device selection.
 --
-  cpu_data_next <= cpu_data_out;  -- Daisy chain to next device
-  cpu_selected <= (cpu_location(31 downto 10) = cpu_addr(31 downto 10));
-  cpu_data_in <= q when cpu_selected else
-                 cpu_data_out;
+--  cpu_data_chain <= cpu_data_in;  -- Daisy chain to next device
+  cpu_selected <= (cpu_location(31 downto 10) = cpu_bus.addr(31 downto 10));
+  cpu_data_chain <= q when cpu_selected else
+                 cpu_data_in;
   ack_out <= '1' when cpu_selected else ack_in;
 --
 --  Control process

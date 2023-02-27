@@ -45,6 +45,7 @@ and in the FPGA.  This is many times important.
 ## Roadmap
 This is more or less what I see that needs to be done to get to a working CPU.  This list will
 probably be rather dynamic with things being added and deleted as work progresses.
+* Ongoing various bright ideas on how to better organize things
 * Currently working on preparations to add the bus interface to the CPU
 * Get the CPU to be able to talk to the RAM module
 * Preparations for instruction decoder

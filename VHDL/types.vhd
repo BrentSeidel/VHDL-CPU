@@ -25,10 +25,25 @@ package typedefs is
 --
 --  Host bus types
 --
+--  This is all the signals from the host that are broadcast on the host bus
+--
   type host_bus_ctrl is record
     cmd_read  : boolean;  --  Read from device
 	 cmd_write : boolean;  --  Write to device
 	 addr      : work.typedefs.byte;
+  end record;
+--
+--  CPU bus ctrl
+--
+--  This is all the signals from the CPU that are broadcast on the CPU bus.
+--  Note that this should be an unconstrained record, but it appears not to be
+--  supported by Quartus Prime Lite Edition V21.1.1.
+--
+  type cpu_bus_ctrl is record
+    data      : std_logic_vector(31 downto 0);
+	 addr      : std_logic_vector(31 downto 0);
+	 read_cmd  : std_logic;  --  Output read 
+	 write_cmd : std_logic;  --  Output write
   end record;
   --
   --  Some conversion functions

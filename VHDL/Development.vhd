@@ -150,6 +150,7 @@ architecture rtl of Development is
   signal slow_clock : std_logic;  --  Clock programmatically toggled by Arduino
   signal internal_clock : std_logic;
   signal host       : work.typedefs.host_bus_ctrl;
+  signal cpu_bus    : work.typedefs.cpu_bus_ctrl;
 --
 --  Some constants for register base addresses
 --
@@ -202,18 +203,23 @@ begin
   cpu32: entity work.CPU32
     generic map(location => addr_cpu)
 	 port map(data_in => data_b1, data_out => data_b2,
-	           host => host, clock => internal_clock);
+	           host => host,
+				  cpu_bus => cpu_bus,
+		        bus_data => (others => '0'),
+		        bus_ack => '0',
+				  clock => internal_clock);
 --
 --  Instantiate a RAM block
 --
   ram1: entity work.ram_block
     generic map(cpu_location => (others => '0'), host_location => addr_ram)
-    port map(cpu_data_out => (others => '0'),
+    port map(cpu_bus => cpu_bus,
+--	          cpu_data_out => (others => '0'),
 	          cpu_data_in => cpu_data1,
-				 cpu_data_next => cpu_data2,
-				 cpu_addr => (others => '0'),
-				 read_in => '0',
-				 write_in => '0',
+				 cpu_data_chain => cpu_data2,
+--				 cpu_addr => (others => '0'),
+--				 read_in => '0',
+--				 write_in => '0',
 				 ack_in => '0',
 				 ack_out => ack_chain1,
 				 clock => internal_clock,
