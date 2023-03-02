@@ -403,6 +403,42 @@
          d="M 0,0 5,-5 -12.5,0 5,5 Z"
          id="path6936-25" />
     </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lend-02"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true"
+       viewBox="0 0 17.773854 10.156488"
+       markerWidth="17.773853"
+       markerHeight="10.156487"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path6936-48" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lend-52"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true"
+       viewBox="0 0 17.773854 10.156488"
+       markerWidth="17.773853"
+       markerHeight="10.156487"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path6936-27" />
+    </marker>
   </defs>
   <g
      inkscape:label="Layer 1"
@@ -1207,6 +1243,36 @@
          id="tspan6295"
          x="59.727467"
          y="-37.88887">incdec</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend-02)"
+       d="M 42.333333,60.854167 V 74.083333"
+       id="path5296-3" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11667px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="54.284172"
+       y="-43.350643"
+       id="text3536-8-3-1-9"
+       transform="rotate(90)"><tspan
+         sodipodi:role="line"
+         id="tspan1339"
+         x="54.284172"
+         y="-43.350643">bus_read_req</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.25;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#Arrow1Lend-52)"
+       d="M 47.625,60.854167 V 74.083333"
+       id="path5296-37" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.11667px;line-height:1.25;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="54.132538"
+       y="-48.964043"
+       id="text3536-8-3-1-90"
+       transform="rotate(90)"><tspan
+         sodipodi:role="line"
+         id="tspan1319"
+         x="54.132538"
+         y="-48.964043">bus_write_req</tspan></text>
   </g>
   <metadata
      id="metadata395">
