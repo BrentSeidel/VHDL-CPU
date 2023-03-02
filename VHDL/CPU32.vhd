@@ -24,6 +24,8 @@ use ieee.std_logic_unsigned.all ;
 --   11    R/W   ALU function
 --   12    R/W   ALU flags
 --   13    R/W   Enables
+--                 6 - Bus read request
+--                 5 - Bus write request
 --                 4 - Select Op 2 as 1
 --                 3 - Enable flags
 --                 2 - Enable read
@@ -67,6 +69,8 @@ architecture rtl of CPU32 is
   signal incdec         : std_logic;
   signal enable_read    : std_logic;
   signal enable_write   : std_logic;
+  signal bus_read_req   : std_logic;
+  signal bus_write_req  : std_logic;
   signal func_value     : work.typedefs.byte;
   signal flags_en       : std_logic;
   signal flags_pre      : work.typedefs.t_FLAGS;
@@ -81,6 +85,8 @@ begin
 		 start => start,
 		 incdec => incdec,
 		 state => state,
+		 bus_read_req  => bus_read_req,
+		 bus_write_req => bus_write_req,
        r_addr1   => raddr1,     --  Read port 1
 		 r_addr2   => raddr2,     --  Read port 2
 		 r_addr3   => raddr3,     --  Read port 3
@@ -195,15 +201,18 @@ begin
 		  end if;
 		when enable_addr =>  --  Enable/control bits
         if host.cmd_write then
-		    incdec       <= data_in(4);
-		    flags_en     <= data_in(3);
-		    enable_read  <= data_in(2);
-		    enable_write <= data_in(1);
-		    start        <= data_in(0);
+		    bus_read_req  <= data_in(6);
+			 bus_write_req <= data_in(5);
+		    incdec        <= data_in(4);
+		    flags_en      <= data_in(3);
+		    enable_read   <= data_in(2);
+		    enable_write  <= data_in(1);
+		    start         <= data_in(0);
 			 data_out <= data_in;
 	     elsif host.cmd_read then
 		    data_out <= (0 => start, 1 => enable_write, 2 => enable_read,
-			              3 => flags_en, 4 => incdec, others => '0');
+			              3 => flags_en, 4 => incdec, 5 => bus_write_req,
+							  6 => bus_read_req, others => '0');
 		  end if;
       when others =>
 	     data_out <= data_in;

@@ -11,24 +11,26 @@ use ieee.numeric_std.all;
 
 entity CPU is
   generic(count : natural; size : natural);
-  port(clock   : in std_logic;
-       start   : in std_logic;
-		 incdec  : in std_logic;
-		 state   : out std_logic_vector(3 downto 0);
-       r_addr1 : in natural range 0 to (2**count)-1;
-		 r_addr2 : in natural range 0 to (2**count)-1;
-		 r_addr3 : in natural range 0 to (2**count)-1;
-		 r_data3 : out std_logic_vector (size-1 downto 0);
-		 r_en3   : in std_logic;
-		 w_addr  : in natural range 0 to (2**count)-1;
-		 w_data  : in std_logic_vector (size-1 downto 0);
-		 host_write : in std_logic;  --  Write external data
-       funct     : in work.typedefs.byte;
-		 cpu_bus   : out work.typedefs.cpu_bus_ctrl;
-		 cpu_bus_ret : in work.typedefs.cpu_bus_ret;
-		 flags_en  : in std_logic;  --  Write flags
-       flags_in  : in work.typedefs.t_FLAGS;
-       flags_out : out work.typedefs.t_FLAGS);
+  port(clock         : in std_logic;
+       start         : in std_logic;
+		 incdec        : in std_logic;
+		 bus_read_req  : in std_logic;
+		 bus_write_req : in std_logic;
+		 state         : out std_logic_vector(3 downto 0);
+       r_addr1       : in natural range 0 to (2**count)-1;
+		 r_addr2       : in natural range 0 to (2**count)-1;
+		 r_addr3       : in natural range 0 to (2**count)-1;
+		 r_data3       : out std_logic_vector (size-1 downto 0);
+		 r_en3         : in std_logic;
+		 w_addr        : in natural range 0 to (2**count)-1;
+		 w_data        : in std_logic_vector (size-1 downto 0);
+		 host_write    : in std_logic;  --  Write external data
+       funct         : in work.typedefs.byte;
+		 cpu_bus       : out work.typedefs.cpu_bus_ctrl;
+		 cpu_bus_ret   : in work.typedefs.cpu_bus_ret;
+		 flags_en      : in std_logic;  --  Write flags
+       flags_in      : in work.typedefs.t_FLAGS;
+       flags_out     : out work.typedefs.t_FLAGS);
 end entity CPU;
 
 architecture rtl of CPU is
@@ -73,6 +75,8 @@ begin
 				 alu_data => res,
 				 bus_data => bus_data_in_int,
 				 flags_en => flags_en,
+             bus_read_req  => bus_read_req,
+             bus_write_req => bus_write_req,
 				 read_cmd => read_cmd,
 				 write_cmd => write_cmd,
              enable_op1 => enable_op1,

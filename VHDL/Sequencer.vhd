@@ -17,14 +17,16 @@ use ieee.Numeric_Std.all;
 
 entity sequencer is
   generic(count : natural; size : natural);
-  port(clock        : in std_logic;
-       start        : in std_logic;  --  Start processing
-		 incdec       : in std_logic;  --  Select an increment/decrement operation
-		 host_write   : in std_logic;  --  Host request to write data
-		 host_data    : in std_logic_vector (size-1 downto 0);
-		 alu_data     : in std_logic_vector (size-1 downto 0);
-		 bus_data     : in std_logic_vector (size-1 downto 0);
-		 flags_en     : in std_logic;  --  Host request to write psw
+  port(clock         : in std_logic;
+       start         : in std_logic;  --  Start processing
+		 incdec        : in std_logic;  --  Select an increment/decrement operation
+		 host_write    : in std_logic;  --  Host request to write data
+		 host_data     : in std_logic_vector (size-1 downto 0);
+		 alu_data      : in std_logic_vector (size-1 downto 0);
+		 bus_data      : in std_logic_vector (size-1 downto 0);
+		 flags_en      : in std_logic;  --  Host request to write psw
+		 bus_read_req  : in std_logic;  --  Host request for a CPU bus read
+		 bus_write_req : in std_logic;  --  Host request for a CPU bus write
 		 read_cmd      : out std_logic;
 		 write_cmd     : out std_logic;
 		 enable_op1    : out std_logic;
