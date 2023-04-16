@@ -99,9 +99,9 @@ begin
 		  cpu_bus.write_cmd <= '0';
 		  busy <= '0';
 		  ready <= '0';
---		  cpu_bus.data <= (others => '0');
+		  cpu_bus.data <= (others => '0');
 		  data_out_int <= (others => '0');
---		  cpu_bus.addr <= (others => '0');
+		  cpu_bus.addr <= (others => '0');
 		  next_state <= state_null;
 	 end case;
   end process;
