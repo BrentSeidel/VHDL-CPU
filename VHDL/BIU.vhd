@@ -27,15 +27,15 @@ entity bus_interface is
        data_in_int  : in std_logic_vector (data_size-1 downto 0);
        data_out_int : out std_logic_vector (data_size-1 downto 0);
 		 addr_in_int  : in std_logic_vector (addr_size-1 downto 0);
-		 read_int     : in std_logic;  --  Request from CPU to read
-		 write_int    : in std_logic;  --  Request from CPU to write
-		 busy         : out std_logic;  --  Tell CPU request in progress
+		 read_int     : in std_logic;    --  Request from CPU to read
+		 write_int    : in std_logic;    --  Request from CPU to write
+		 busy         : out std_logic;   --  Tell CPU request in progress
 		 ready        : out std_logic);  --  Tell CPU read data is ready
 --
 end entity;
 
 architecture rtl of bus_interface is
-  type states is (state_null, state_read_start, state_read_wait, state_write);
+  type states is (state_null, state_read_start, state_read_wait, state_write_1, state_write_2);
   signal state : states := state_null;
   signal next_state : states := state_null;
 begin
@@ -56,14 +56,14 @@ begin
 		  cpu_bus.read_cmd <= '0';
 		  cpu_bus.write_cmd <= '0';
 		  busy <= '0';
-		  ready <= '0';
-		  cpu_bus.data <= (others => '0');
+		  ready <= '1';
+--		  cpu_bus.data <= (others => '0');
 		  data_out_int <= (others => '0');
-		  cpu_bus.addr <= (others => '0');
+--		  cpu_bus.addr <= (others => '0');
 		  if read_int = '1' then
 		    next_state <= state_read_start;
 		  elsif write_int = '1' then
-		    next_state <= state_write;
+		    next_state <= state_write_1;
 		  else
 		    next_state <= state_null;
 		  end if;
@@ -73,30 +73,35 @@ begin
 		  busy <= '1';
 		  next_state <= state_read_wait;
 		when state_read_wait =>  --  Finish a read request
-		  if ack = '1' then
+		  if cpu_bus_ret.ack = '1' then
 		    data_out_int <= cpu_bus_ret.data;
+			 busy <= '0';
 			 ready <= '1';
 			 next_state <= state_null;
 		  else
 		    next_state <= state_read_wait;
 		  end if;
-		when state_write =>  --  Start a write request
+		when state_write_1 =>  --  Start a write request
+		  cpu_bus.addr <= addr_in_int;
+		  cpu_bus.data <= data_in_int;
+		  cpu_bus.write_cmd <= '0';
+		when state_write_2 =>  --  Finish a write request
 		  cpu_bus.addr <= addr_in_int;
 		  cpu_bus.data <= data_in_int;
 		  cpu_bus.write_cmd <= '1';
-		  if ack = '1' then
+		  if cpu_bus_ret.ack = '1' then
 		    next_state <= state_null;
 		  else
-		    next_state <= state_write;
+		    next_state <= state_write_2;
 		  end if;
 		when others =>  --  Should never get here.  Set everthing to a sane state and try again.
 		  cpu_bus.read_cmd <= '0';
 		  cpu_bus.write_cmd <= '0';
 		  busy <= '0';
 		  ready <= '0';
-		  cpu_bus.data <= (others => '0');
+--		  cpu_bus.data <= (others => '0');
 		  data_out_int <= (others => '0');
-		  cpu_bus.addr <= (others => '0');
+--		  cpu_bus.addr <= (others => '0');
 		  next_state <= state_null;
 	 end case;
   end process;

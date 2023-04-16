@@ -31,12 +31,13 @@ begin
     variable t1   : std_logic_vector (size downto 0);
     variable t2   : std_logic_vector (size downto 0);
     variable temp : std_logic_vector (size downto 0) := (others => '0');
+	 variable flags_temp : work.typedefs.t_FLAGS;
   begin
     t1(size) := '0';
     t1(size-1 downto 0) := op1;
     t2(size) := '0';
     t2(size-1 downto 0) := op2;
-    flags_out <= flags_in;
+    flags_temp := flags_in;
     case funct is
       when work.typedefs.ALU_OP_NULL =>  -- No operation
         temp := (others => '0');
@@ -67,16 +68,17 @@ begin
 		when work.typedefs.ALU_OP_SHR =>  --  Shift right
 		  temp := std_logic_vector(shift_right(unsigned(t1), natural(to_integer(unsigned(t2)))));
       when others =>  --  This is an error condition with an unknown code
-        flags_out.alu_error <= '1';
+        flags_temp.alu_error := '1';
         temp := (others => '0');
     end case;
-    flags_out.sign <= temp(size-1);
-    flags_out.carry <= temp(size);
+    flags_temp.sign := temp(size-1);
+    flags_temp.carry := temp(size);
     if temp(size-1 downto 0) = ZERO then
-      flags_out.zero <= '1';
+      flags_temp.zero := '1';
     else
-      flags_out.zero <= '0';
+      flags_temp.zero := '0';
     end if;
     result <= temp(size-1 downto 0);
+	 flags_out <= flags_temp;
   end process store;
 end rtl;

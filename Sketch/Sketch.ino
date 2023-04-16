@@ -45,12 +45,14 @@ const int ALU_FLAG_ERROR =  8;
 const int ALU_FLAG_BUSER = 16;
 //
 //  Control enables
-const int CTRL_NONE     =  0;
-const int CTRL_START    =  1;
-const int CTRL_EN_WRITE =  2;
-const int CTRL_EN_READ  =  4;
-const int CTRL_EN_FLAGS =  8;
-const int CTRL_OP2_1    = 16;
+const int CTRL_NONE      =  0;
+const int CTRL_START     =  1;
+const int CTRL_EN_WRITE  =  2;
+const int CTRL_EN_READ   =  4;
+const int CTRL_EN_FLAGS  =  8;
+const int CTRL_OP2_1     = 16;
+const int CTRL_MEM_WRITE = 32;
+const int CTRL_MEM_READ  = 64;
 //
 //  Counter registers
 const int COUNT_LSB = 0;
@@ -85,6 +87,14 @@ const int RAM_RDATA3 = RAM_BASE + 6;
 const int RAM_RDATA4 = RAM_BASE + 7;
 const int RAM_ADDR1  = RAM_BASE + 8;
 const int RAM_ADDR2  = RAM_BASE + 9;
+const int RAM_CDATA1 = RAM_BASE + 10;
+const int RAM_CDATA2 = RAM_BASE + 11;
+const int RAM_CDATA3 = RAM_BASE + 12;
+const int RAM_CDATA4 = RAM_BASE + 13;
+const int RAM_CADDR1 = RAM_BASE + 14;
+const int RAM_CADDR2 = RAM_BASE + 15;
+const int RAM_CADDR3 = RAM_BASE + 16;
+const int RAM_CADDR4 = RAM_BASE + 17;
 //
 //  Global counters for test pass and fail
 int tests  = 0;
@@ -108,7 +118,8 @@ void test_cpu(int op1, int op2, int func, int expected,
 void test_incdec(int reg, int dir);
 void ram_write(int addr, int data);
 int ram_read(int addr);
-
+void cpu_write_mem(int addr, int data);
+//-----------------------------------------------------------
 void setup()
 {
   int x;
@@ -289,25 +300,37 @@ void loop()
   {
     ram_write(x, x+0xF00);
   }
+//  for (x = 0; x < 16; x++)
+//  {
+//    y = ram_read(x);
+//    Serial.print("Data in location ");
+//    Serial.print(x, HEX);
+//    Serial.print(" is ");
+//    Serial.print(y, HEX);
+//    if (y == (x + 0xF00))
+//    {
+//      Serial.println("  Pass");
+//    }
+//    else
+//    {
+//      Serial.println("  FAIL!");
+//    }
+//  }
+  Serial.println("Check memory write from CPU...");
+  cpu_write_mem(1, 0xDEAD);
+  cpu_write_mem(2, 0xBEEF);
   for (x = 0; x < 16; x++)
   {
     y = ram_read(x);
     Serial.print("Data in location ");
     Serial.print(x, HEX);
     Serial.print(" is ");
-    Serial.print(y, HEX);
-    if (y == (x + 0xF00))
-    {
-      Serial.println("  Pass");
-    }
-    else
-    {
-      Serial.println("  FAIL!");
-    }
+    Serial.println(y, HEX);
   }
+  Serial.println("All done.");
   while (1);
 }
-//
+//-------------------------------------------------------------------------
 //  Define some test functions
 //
 void print_flags(int flag)
@@ -333,6 +356,8 @@ void print_flags(int flag)
 //   11    R/W   ALU function
 //   12    R/W   ALU flags
 //   13    R/W   Enables
+//                 6 - Bus read request
+//                 5 - Bus write request
 //                 4 - Op2 select 1
 //                 3 - Enable flags
 //                 2 - Enable read
@@ -512,6 +537,31 @@ void test_incdec(int reg, int dir)
   }
 }
 
+void cpu_write_mem(int addr, int data)
+{
+  int temp = 0;
+  Serial.print("Writing ");
+  Serial.print(data, HEX);
+  Serial.print(" to ");
+  Serial.println(addr, HEX);
+  write_addr(CPU_ENABLES, CTRL_NONE);
+  cpu_write_reg(data, 0);  //  Register 0 holds data
+  cpu_write_reg(addr, 1);  //  Register 1 holds address
+  write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
+  write_addr(CPU_ENABLES, CTRL_MEM_WRITE);
+  temp = read_addr(RAM_CDATA1) & 0xFF;
+  temp += (read_addr(RAM_CDATA2) & 0xFF) << 8;
+  temp += (read_addr(RAM_CDATA3) & 0xFF) << 16;
+  temp += (read_addr(RAM_CDATA4) & 0xFF) << 24;
+  Serial.print("  Data bus is ");
+  Serial.println(temp, HEX);
+  temp = read_addr(RAM_CADDR1) & 0xFF;
+  temp += (read_addr(RAM_CADDR2) & 0xFF) << 8;
+  temp += (read_addr(RAM_CADDR3) & 0xFF) << 16;
+  temp += (read_addr(RAM_CADDR4) & 0xFF) << 24;
+  Serial.print("  Address bus is ");
+  Serial.println(temp, HEX);
+}
 ///////////////////////////////////////////////////////
 //
 //  Define some functions to access the FPGA RAM block

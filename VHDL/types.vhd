@@ -106,11 +106,11 @@ package body typedefs is
   function flags_to_vec(flag : in t_FLAGS) return std_logic_vector is
     variable temp : std_logic_vector(4 downto 0) := (others => '0');
   begin
-    temp(0) := flag.carry;
-	 temp(1) := flag.sign;
-	 temp(2) := flag.zero;
-	 temp(3) := flag.alu_error;
-	 temp(4) := flag.bus_error;
+    temp(0) := flag.carry;      --   1
+	 temp(1) := flag.sign;       --   2
+	 temp(2) := flag.zero;       --   4
+	 temp(3) := flag.alu_error;  --   8
+	 temp(4) := flag.bus_error;  --  16
 	 return temp;
   end;
   --
