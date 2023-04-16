@@ -77,6 +77,8 @@ begin
 				 flags_en => flags_en,
              bus_read_req  => bus_read_req,
              bus_write_req => bus_write_req,
+				 bus_busy => bus_busy,
+				 bus_ready => bus_ready,
 				 read_cmd => read_cmd,
 				 write_cmd => write_cmd,
              enable_op1 => enable_op1,

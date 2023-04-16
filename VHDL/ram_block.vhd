@@ -35,7 +35,7 @@ use altera_mf.altera_mf_components.all;
 entity ram_block is
   generic(cpu_location : std_logic_vector (31 downto 0);  --  Location on CPU bus
          host_location : work.typedefs.byte);             --  Location for host registers
-  port(cpu_bus   : in work.typedefs.cpu_bus_ctrl;
+  port(cpu_bus         : in work.typedefs.cpu_bus_ctrl;
        cpu_ret_in      : in work.typedefs.cpu_bus_ret;
 		 cpu_ret_out     : out work.typedefs.cpu_bus_ret;
 		 clock           : in std_logic;
@@ -55,6 +55,14 @@ architecture rtl of ram_block is
   constant Rdata4_addr  : work.typedefs.byte := host_location + 7;
   constant Addr1_addr   : work.typedefs.byte := host_location + 8;
   constant Addr2_addr   : work.typedefs.byte := host_location + 9;
+  constant Cdata1_addr  : work.typedefs.byte := host_location + 10;
+  constant Cdata2_addr  : work.typedefs.byte := host_location + 11;
+  constant Cdata3_addr  : work.typedefs.byte := host_location + 12;
+  constant Cdata4_addr  : work.typedefs.byte := host_location + 13;
+  constant Caddr1_addr  : work.typedefs.byte := host_location + 14;
+  constant Caddr2_addr  : work.typedefs.byte := host_location + 15;
+  constant Caddr3_addr  : work.typedefs.byte := host_location + 16;
+  constant Caddr4_addr  : work.typedefs.byte := host_location + 17;
   signal host_ram_data_in  : std_logic_vector (31 downto 0);
   signal host_ram_data_out : std_logic_vector (31 downto 0);
   signal host_ram_addr     : std_logic_vector (9 downto 0);
@@ -89,7 +97,7 @@ begin
 --  Handle device selection.
 --
   cpu_selected <= (cpu_location(31 downto 10) = cpu_bus.addr(31 downto 10));
-  cpu_ret_out <= (data => q, ack => '1') when cpu_selected else
+  cpu_ret_out <= (data => q, ack => '0') when cpu_selected else
                  cpu_ret_in;
 --
 --  Control process
@@ -169,6 +177,38 @@ begin
 			 host_data_out(3) <= host_write;
 			 host_data_out(4) <= host_read;
 			 host_data_out(7 downto 5) <= (others => '0');
+		  end if;
+		when Cdata1_addr =>  --  Read from CPU data bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.data(7 downto 0);
+		  end if;
+		when Cdata2_addr =>  --  Read from CPU data bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.data(15 downto 8);
+		  end if;
+		when Cdata3_addr =>  --  Read from CPU data bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.data(23 downto 16);
+		  end if;
+		when Cdata4_addr =>  --  Read from CPU data bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.data(31 downto 24);
+		  end if;
+		when Caddr1_addr =>  --  Read from CPU address bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.addr(7 downto 0);
+		  end if;
+		when Caddr2_addr =>  --  Read from CPU address bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.addr(15 downto 8);
+		  end if;
+		when Caddr3_addr =>  --  Read from CPU address bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.addr(23 downto 16);
+		  end if;
+		when Caddr4_addr =>  --  Read from CPU address bus (read only)
+		  if host.cmd_read then
+		    host_data_out <= cpu_bus.addr(31 downto 24);
 		  end if;
       when others =>  --  Not being addressed
 	     host_data_out <= host_data_in;

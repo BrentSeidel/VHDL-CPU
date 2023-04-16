@@ -27,6 +27,8 @@ entity sequencer is
 		 flags_en      : in std_logic;  --  Host request to write psw
 		 bus_read_req  : in std_logic;  --  Host request for a CPU bus read
 		 bus_write_req : in std_logic;  --  Host request for a CPU bus write
+		 bus_busy      : in std_logic;
+		 bus_ready     : in std_logic;
 		 read_cmd      : out std_logic;
 		 write_cmd     : out std_logic;
 		 enable_op1    : out std_logic;
@@ -40,7 +42,8 @@ entity sequencer is
 end entity sequencer;
 
 architecture rtl of sequencer is
-  type states is (state_null, state_read_op, state_write_res, state_final);
+  type states is (state_null, state_read_op, state_write_res, state_final,
+                  state_mem_write, state_mem_read);
   signal state : states := state_null;
   signal next_state : states := state_null;
 begin
@@ -65,6 +68,8 @@ begin
 	   when state_null =>  --  Wait for start signal to go high
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
 		  enable_res <= host_write;
 		  write_data <= host_data;
 		  psw_mux_sel <= '0';
@@ -73,12 +78,18 @@ begin
 		  op2_mux_sel <= '0';
 		  if start = '1' then
           next_state <= state_read_op;
+		  elsif bus_write_req = '1' then
+		    next_state <= state_mem_write;
+		  elsif bus_read_req = '1' then
+		    next_state <= state_mem_read;
 		  else
 			 next_state <= state_null;
 		  end if;
 		when state_read_op =>  --  Read operands for the ALU
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
 		  enable_res <= host_write;
 		  write_data <= alu_data;
 		  psw_mux_sel <= '1';
@@ -86,9 +97,11 @@ begin
 		  set_psw <= flags_en;
 		  next_state <= state_write_res;
 		when state_write_res =>  --  Write result from the ALU
-		  enable_op1 <= '0';
-		  enable_op2 <= '0';
+		  enable_op1 <= '1';
+		  enable_op2 <= '1';
 		  enable_res <= '1';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
 		  write_data <= alu_data;
 		  psw_mux_sel <= '1';
 	     op2_mux_sel <= incdec;
@@ -101,6 +114,8 @@ begin
 		when state_final =>  -- Wait for start signal to go low
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
 		  enable_res <= host_write;
 		  write_data <= host_data;
 		  psw_mux_sel <= '0';
@@ -111,10 +126,30 @@ begin
 		  else
 		    next_state <= state_final;
 		  end if;
+		when state_mem_write =>
+		  enable_op1 <= '1';
+		  enable_op2 <= '1';
+		  read_cmd <= '1';
+		  write_cmd <= '0';
+		  psw_mux_sel <= '0';
+		  op2_mux_sel <= '0';
+		  set_psw <= flags_en;
+		  if bus_ready = '1' then
+		    next_state <= state_null;
+		  else
+          next_state <= state_mem_write;
+		  end if;
+		when state_mem_read =>
+		  psw_mux_sel <= '0';
+		  op2_mux_sel <= '0';
+		  set_psw <= flags_en;
+		  next_state <= state_null;
 		when others =>  --  Should never get here.  Set everthing to a sane state and try again.
 		  next_state <= state_null;
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
 		  enable_res <= host_write;
 		  write_data <= host_data;
 		  psw_mux_sel <= '0';
