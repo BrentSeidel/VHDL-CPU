@@ -12,3 +12,7 @@ waits for an acknowledge.
 ### Read
 The address is set along with the read command.  The BIU then waits for an
 acknowledge before reading the data in.
+
+### State Diagram
+The state diagram of the bus interface unit is (subject to change)
+![BIU State Diagram](./BIU-states.svg)
