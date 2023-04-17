@@ -129,8 +129,8 @@ begin
 		when state_mem_write =>
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
-		  read_cmd <= '1';
-		  write_cmd <= '0';
+		  read_cmd <= '0';
+		  write_cmd <= '1';
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
 		  set_psw <= flags_en;
@@ -139,7 +139,7 @@ begin
 		  else
           next_state <= state_mem_write;
 		  end if;
-		when state_mem_read =>
+		when state_mem_read =>  --  Not yet implemented
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
 		  set_psw <= flags_en;
