@@ -57,9 +57,9 @@ begin
 		  cpu_bus.write_cmd <= '0';
 		  busy <= '0';
 		  ready <= '1';
---		  cpu_bus.data <= (others => '0');
+		  cpu_bus.data <= (others => '0');
 		  data_out_int <= (others => '0');
---		  cpu_bus.addr <= (others => '0');
+		  cpu_bus.addr <= (others => '0');
 		  if read_int = '1' then
 		    next_state <= state_read_start;
 		  elsif write_int = '1' then
