@@ -112,8 +112,8 @@ begin
 		    next_state <= state_final;
 		  end if;
 		when state_final =>  -- Wait for start signal to go low
-		  enable_op1 <= '0';
-		  enable_op2 <= '0';
+		  enable_op1 <= '1';
+		  enable_op2 <= '1';
 		  read_cmd <= '0';
 		  write_cmd <= '0';
 		  enable_res <= host_write;

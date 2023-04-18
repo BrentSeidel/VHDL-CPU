@@ -73,12 +73,12 @@ begin
     end case;
     flags_temp.sign := temp(size-1);
     flags_temp.carry := temp(size);
-    if temp(size-1 downto 0) = ZERO then
-      flags_temp.zero := '1';
-    else
-      flags_temp.zero := '0';
-    end if;
     result <= temp(size-1 downto 0);
+    if result /= ZERO then
+      flags_temp.zero := '0';
+    else
+      flags_temp.zero := '1';
+    end if;
 	 flags_out <= flags_temp;
   end process store;
 end rtl;

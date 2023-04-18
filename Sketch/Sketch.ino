@@ -38,6 +38,7 @@ const int ALU_OP_SHR = 12;
 const int ALU_OP_ERR = 255;  //  Unassigned code causes an error
 //
 //  ALU Flags
+const int ALU_FLAG_NONE  =  0;
 const int ALU_FLAG_CARRY =  1;
 const int ALU_FLAG_SIGN  =  2;
 const int ALU_FLAG_ZERO  =  4;
@@ -185,101 +186,101 @@ void loop()
   Serial.println("Starting CPU tests.");
   test_cpu(1, 2, ALU_OP_ERR, CTRL_NONE, 0, "Error", ALU_FLAG_ERROR + ALU_FLAG_ZERO);
   set_flags(0);
-  test_cpu(31, 20, ALU_OP_ADD, CTRL_NONE, 51, "31 ADD 20", 0);
-  test_cpu(21, 40, ALU_OP_ADD, CTRL_NONE, 61, "21 ADD 40", 0);
-  test_cpu(0xFFFF, 1, ALU_OP_ADD, CTRL_NONE, 0x10000, "FFFF ADD 1", 0);
-  test_cpu(0x7FFF, 1, ALU_OP_ADD, CTRL_NONE, 0x8000, "7FFF ADD 1", 0);
+  test_cpu(31, 20, ALU_OP_ADD, CTRL_NONE, 51, "31 ADD 20", ALU_FLAG_NONE);
+  test_cpu(21, 40, ALU_OP_ADD, CTRL_NONE, 61, "21 ADD 40", ALU_FLAG_NONE);
+  test_cpu(0xFFFF, 1, ALU_OP_ADD, CTRL_NONE, 0x10000, "FFFF ADD 1", ALU_FLAG_NONE);
+  test_cpu(0x7FFF, 1, ALU_OP_ADD, CTRL_NONE, 0x8000, "7FFF ADD 1", ALU_FLAG_NONE);
   //
-  test_cpu(31, 20, ALU_OP_SUB, CTRL_NONE, 11, "31 SUB 20", 0);
+  test_cpu(31, 20, ALU_OP_SUB, CTRL_NONE, 11, "31 SUB 20", ALU_FLAG_NONE);
   test_cpu(20, 31, ALU_OP_SUB, CTRL_NONE, -11, "20 SUB 31",
            ALU_FLAG_SIGN + ALU_FLAG_CARRY);
   //
   test_cpu(127, 0, ALU_OP_NOT, CTRL_NONE, -128, "127 NOT", ALU_FLAG_SIGN);
   test_cpu(1, 123, ALU_OP_NOT, CTRL_NONE, -2, "1 NOT", ALU_FLAG_SIGN);
   //
-  test_cpu(15, 13, ALU_OP_AND, CTRL_NONE, 13, "15 AND 13", 0);
+  test_cpu(15, 13, ALU_OP_AND, CTRL_NONE, 13, "15 AND 13", ALU_FLAG_NONE);
   test_cpu(16, 15, ALU_OP_AND, CTRL_NONE, 0, "16 AND 15", ALU_FLAG_ZERO);
   //
-  test_cpu(16, 15, ALU_OP_OR, CTRL_NONE, 31, "16 OR 15", 0);
-  test_cpu(15, 13, ALU_OP_OR, CTRL_NONE, 15, "15 OR 13", 0);
+  test_cpu(16, 15, ALU_OP_OR, CTRL_NONE, 31, "16 OR 15", ALU_FLAG_NONE);
+  test_cpu(15, 13, ALU_OP_OR, CTRL_NONE, 15, "15 OR 13", ALU_FLAG_NONE);
   //
-  test_cpu(5, 15, ALU_OP_XOR, CTRL_NONE, 10, "5 XOR 15", 0);
-  test_cpu(255, 254, ALU_OP_XOR, CTRL_NONE, 1, "255 XOR 254", 0);
+  test_cpu(5, 15, ALU_OP_XOR, CTRL_NONE, 10, "5 XOR 15", ALU_FLAG_NONE);
+  test_cpu(255, 254, ALU_OP_XOR, CTRL_NONE, 1, "255 XOR 254", ALU_FLAG_NONE);
   test_cpu(123, 123, ALU_OP_XOR, CTRL_NONE, 0, "123 XOR 123", ALU_FLAG_ZERO);
   //
   test_cpu(0, 0, ALU_OP_TST, CTRL_NONE, 0, "0 TST", ALU_FLAG_ZERO);
-  test_cpu(1, 0, ALU_OP_TST, CTRL_NONE, 1, "1 TST", 0);
-  test_cpu(2, 0, ALU_OP_TST, CTRL_NONE, 2, "2 TST", 0);
-  test_cpu(4, 0, ALU_OP_TST, CTRL_NONE, 4, "4 TST", 0);
-  test_cpu(8, 0, ALU_OP_TST, CTRL_NONE, 8, "8 TST", 0);
-  test_cpu(16, 0, ALU_OP_TST, CTRL_NONE, 16, "16 TST", 0);
-  test_cpu(32, 0, ALU_OP_TST, CTRL_NONE, 32, "32 TST", 0);
-  test_cpu(64, 0, ALU_OP_TST, CTRL_NONE, 64, "64 TST", 0);
-  test_cpu(128, 0, ALU_OP_TST, CTRL_NONE, 128, "128 TST", 0);
-  test_cpu(0x100, 0, ALU_OP_TST, CTRL_NONE, 0x100, "0x100 TST", 0);
-  test_cpu(0x200, 0, ALU_OP_TST, CTRL_NONE, 0x200, "0x200 TST", 0);
-  test_cpu(0x400, 0, ALU_OP_TST, CTRL_NONE, 0x400, "0x400 TST", 0);
-  test_cpu(0x800, 0, ALU_OP_TST, CTRL_NONE, 0x800, "0x800 TST", 0);
-  test_cpu(0x1000, 0, ALU_OP_TST, CTRL_NONE, 0x1000, "0x1000 TST", 0);
-  test_cpu(0x2000, 0, ALU_OP_TST, CTRL_NONE, 0x2000, "0x2000 TST", 0);
-  test_cpu(0x4000, 0, ALU_OP_TST, CTRL_NONE, 0x4000, "0x4000 TST", 0);
-  test_cpu(0x8000, 0, ALU_OP_TST, CTRL_NONE, 0x8000, "0x8000 TST", 0);
-  test_cpu(0x10000, 0, ALU_OP_TST, CTRL_NONE, 0x10000, "0x10000 TST", 0);
-  test_cpu(0x20000, 0, ALU_OP_TST, CTRL_NONE, 0x20000, "0x20000 TST", 0);
-  test_cpu(0x40000, 0, ALU_OP_TST, CTRL_NONE, 0x40000, "0x40000 TST", 0);
-  test_cpu(0x80000, 0, ALU_OP_TST, CTRL_NONE, 0x80000, "0x80000 TST", 0);
-  test_cpu(0x100000, 0, ALU_OP_TST, CTRL_NONE, 0x100000, "0x100000 TST", 0);
-  test_cpu(0x200000, 0, ALU_OP_TST, CTRL_NONE, 0x200000, "0x200000 TST", 0);
-  test_cpu(0x400000, 0, ALU_OP_TST, CTRL_NONE, 0x400000, "0x400000 TST", 0);
-  test_cpu(0x800000, 0, ALU_OP_TST, CTRL_NONE, 0x800000, "0x800000 TST", 0);
-  test_cpu(0x1000000, 0, ALU_OP_TST, CTRL_NONE, 0x1000000, "0x1000000 TST", 0);
-  test_cpu(0x2000000, 0, ALU_OP_TST, CTRL_NONE, 0x2000000, "0x2000000 TST", 0);
-  test_cpu(0x4000000, 0, ALU_OP_TST, CTRL_NONE, 0x4000000, "0x4000000 TST", 0);
-  test_cpu(0x8000000, 0, ALU_OP_TST, CTRL_NONE, 0x8000000, "0x8000000 TST", 0);
-  test_cpu(0x10000000, 0, ALU_OP_TST, CTRL_NONE, 0x10000000, "0x10000000 TST", 0);
-  test_cpu(0x20000000, 0, ALU_OP_TST, CTRL_NONE, 0x20000000, "0x20000000 TST", 0);
-  test_cpu(0x40000000, 0, ALU_OP_TST, CTRL_NONE, 0x40000000, "0x40000000 TST", 0);
+  test_cpu(1, 0, ALU_OP_TST, CTRL_NONE, 1, "1 TST", ALU_FLAG_NONE);
+  test_cpu(2, 0, ALU_OP_TST, CTRL_NONE, 2, "2 TST", ALU_FLAG_NONE);
+  test_cpu(4, 0, ALU_OP_TST, CTRL_NONE, 4, "4 TST", ALU_FLAG_NONE);
+  test_cpu(8, 0, ALU_OP_TST, CTRL_NONE, 8, "8 TST", ALU_FLAG_NONE);
+  test_cpu(16, 0, ALU_OP_TST, CTRL_NONE, 16, "16 TST", ALU_FLAG_NONE);
+  test_cpu(32, 0, ALU_OP_TST, CTRL_NONE, 32, "32 TST", ALU_FLAG_NONE);
+  test_cpu(64, 0, ALU_OP_TST, CTRL_NONE, 64, "64 TST", ALU_FLAG_NONE);
+  test_cpu(128, 0, ALU_OP_TST, CTRL_NONE, 128, "128 TST", ALU_FLAG_NONE);
+  test_cpu(0x100, 0, ALU_OP_TST, CTRL_NONE, 0x100, "0x100 TST", ALU_FLAG_NONE);
+  test_cpu(0x200, 0, ALU_OP_TST, CTRL_NONE, 0x200, "0x200 TST", ALU_FLAG_NONE);
+  test_cpu(0x400, 0, ALU_OP_TST, CTRL_NONE, 0x400, "0x400 TST", ALU_FLAG_NONE);
+  test_cpu(0x800, 0, ALU_OP_TST, CTRL_NONE, 0x800, "0x800 TST", ALU_FLAG_NONE);
+  test_cpu(0x1000, 0, ALU_OP_TST, CTRL_NONE, 0x1000, "0x1000 TST", ALU_FLAG_NONE);
+  test_cpu(0x2000, 0, ALU_OP_TST, CTRL_NONE, 0x2000, "0x2000 TST", ALU_FLAG_NONE);
+  test_cpu(0x4000, 0, ALU_OP_TST, CTRL_NONE, 0x4000, "0x4000 TST", ALU_FLAG_NONE);
+  test_cpu(0x8000, 0, ALU_OP_TST, CTRL_NONE, 0x8000, "0x8000 TST", ALU_FLAG_NONE);
+  test_cpu(0x10000, 0, ALU_OP_TST, CTRL_NONE, 0x10000, "0x10000 TST", ALU_FLAG_NONE);
+  test_cpu(0x20000, 0, ALU_OP_TST, CTRL_NONE, 0x20000, "0x20000 TST", ALU_FLAG_NONE);
+  test_cpu(0x40000, 0, ALU_OP_TST, CTRL_NONE, 0x40000, "0x40000 TST", ALU_FLAG_NONE);
+  test_cpu(0x80000, 0, ALU_OP_TST, CTRL_NONE, 0x80000, "0x80000 TST", ALU_FLAG_NONE);
+  test_cpu(0x100000, 0, ALU_OP_TST, CTRL_NONE, 0x100000, "0x100000 TST", ALU_FLAG_NONE);
+  test_cpu(0x200000, 0, ALU_OP_TST, CTRL_NONE, 0x200000, "0x200000 TST", ALU_FLAG_NONE);
+  test_cpu(0x400000, 0, ALU_OP_TST, CTRL_NONE, 0x400000, "0x400000 TST", ALU_FLAG_NONE);
+  test_cpu(0x800000, 0, ALU_OP_TST, CTRL_NONE, 0x800000, "0x800000 TST", ALU_FLAG_NONE);
+  test_cpu(0x1000000, 0, ALU_OP_TST, CTRL_NONE, 0x1000000, "0x1000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x2000000, 0, ALU_OP_TST, CTRL_NONE, 0x2000000, "0x2000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x4000000, 0, ALU_OP_TST, CTRL_NONE, 0x4000000, "0x4000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x8000000, 0, ALU_OP_TST, CTRL_NONE, 0x8000000, "0x8000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x10000000, 0, ALU_OP_TST, CTRL_NONE, 0x10000000, "0x10000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x20000000, 0, ALU_OP_TST, CTRL_NONE, 0x20000000, "0x20000000 TST", ALU_FLAG_NONE);
+  test_cpu(0x40000000, 0, ALU_OP_TST, CTRL_NONE, 0x40000000, "0x40000000 TST", ALU_FLAG_NONE);
   test_cpu(0x80000000, 0, ALU_OP_TST, CTRL_NONE, 0x80000000, "0x80000000 TST", ALU_FLAG_SIGN);
   test_cpu(0xFFFFFFFF, 0, ALU_OP_TST, CTRL_NONE, 0xFFFFFFFF, "0xFFFFFFFF TST", ALU_FLAG_SIGN);
-  test_cpu(255, 0, ALU_OP_TST, CTRL_NONE, 255, "255 TST", 0);
-  test_cpu(127, 0, ALU_OP_TST, CTRL_NONE, 127, "127 TST", 0);
+  test_cpu(255, 0, ALU_OP_TST, CTRL_NONE, 255, "255 TST", ALU_FLAG_NONE);
+  test_cpu(127, 0, ALU_OP_TST, CTRL_NONE, 127, "127 TST", ALU_FLAG_NONE);
   test_cpu(0, 255, ALU_OP_TST, CTRL_NONE, 0, "0 TST", ALU_FLAG_ZERO);
-  test_cpu(0xFFFF, 0, ALU_OP_TST, CTRL_NONE, 0xFFFF, "0xFFFF TST", 0);
+  test_cpu(0xFFFF, 0, ALU_OP_TST, CTRL_NONE, 0xFFFF, "0xFFFF TST", ALU_FLAG_NONE);
   test_cpu(0x80000000, 0, ALU_OP_TST, CTRL_NONE, 0x80000000, "128 TST", ALU_FLAG_SIGN);
   test_cpu(0xFFFFFFFF, 0, ALU_OP_TST, CTRL_NONE, 0xFFFFFFFF, "0xFFFFFFFF TST", ALU_FLAG_SIGN);
   //
   test_cpu(255, 0, ALU_OP_NEG, CTRL_NONE, -255, "255 NEG", ALU_FLAG_SIGN);
   test_cpu(127, 255, ALU_OP_NEG, CTRL_NONE, -127, "127 NEG", ALU_FLAG_SIGN);
-  test_cpu(-127, 255, ALU_OP_NEG, CTRL_NONE, 127, "-127 NEG", 0);
+  test_cpu(-127, 255, ALU_OP_NEG, CTRL_NONE, 127, "-127 NEG", ALU_FLAG_NONE);
   //
-  test_cpu(100, 10, ALU_OP_ADC, CTRL_NONE, 110, "100 ADC 10", 0);
+  test_cpu(100, 10, ALU_OP_ADC, CTRL_NONE, 110, "100 ADC 10", ALU_FLAG_NONE);
   set_flags(ALU_FLAG_CARRY);
-  test_cpu(100, 10, ALU_OP_ADC, CTRL_NONE, 111, "100 ADC 10", 0);
+  test_cpu(100, 10, ALU_OP_ADC, CTRL_NONE, 111, "100 ADC 10", ALU_FLAG_NONE);
   //
   set_flags(0);
-  test_cpu(100, 10, ALU_OP_SBC, CTRL_NONE, 90, "100 SBC 10", 0);
+  test_cpu(100, 10, ALU_OP_SBC, CTRL_NONE, 90, "100 SBC 10", ALU_FLAG_NONE);
   set_flags(ALU_FLAG_CARRY);
-  test_cpu(100, 10, ALU_OP_SBC, CTRL_NONE, 89, "100 SBC 10", 0);
+  test_cpu(100, 10, ALU_OP_SBC, CTRL_NONE, 89, "100 SBC 10", ALU_FLAG_NONE);
   //
-  test_cpu(1, 0, ALU_OP_SHL, CTRL_NONE, 1, "1 SHL 0", 0);
-  test_cpu(1, 1, ALU_OP_SHL, CTRL_NONE, 2, "1 SHL 1", 0);
-  test_cpu(1, 3, ALU_OP_SHL, CTRL_NONE, 8, "1 SHL 3", 0);
+  test_cpu(1, 0, ALU_OP_SHL, CTRL_NONE, 1, "1 SHL 0", ALU_FLAG_NONE);
+  test_cpu(1, 1, ALU_OP_SHL, CTRL_NONE, 2, "1 SHL 1", ALU_FLAG_NONE);
+  test_cpu(1, 3, ALU_OP_SHL, CTRL_NONE, 8, "1 SHL 3", ALU_FLAG_NONE);
   test_cpu(1, 31, ALU_OP_SHL, CTRL_NONE, 0x80000000, "1 SHL 31", ALU_FLAG_SIGN);
   test_cpu(1, 32, ALU_OP_SHL, CTRL_NONE, 0, "1 SHL 32",
            ALU_FLAG_ZERO + ALU_FLAG_CARRY);
   //
   test_cpu(0x80000000, 0, ALU_OP_SHR, CTRL_NONE, 0x80000000, "0x80000000 SHR 0", ALU_FLAG_SIGN);
-  test_cpu(0x80000000, 1, ALU_OP_SHR, CTRL_NONE, 0x40000000, "0x80000000 SHR 1", 0);
-  test_cpu(0x80000000, 3, ALU_OP_SHR, CTRL_NONE, 0x10000000, "0x80000000 SHR 3", 0);
-  test_cpu(0x80000000, 31, ALU_OP_SHR, CTRL_NONE, 1, "0x80000000 SHR 31", 0);
+  test_cpu(0x80000000, 1, ALU_OP_SHR, CTRL_NONE, 0x40000000, "0x80000000 SHR 1", ALU_FLAG_NONE);
+  test_cpu(0x80000000, 3, ALU_OP_SHR, CTRL_NONE, 0x10000000, "0x80000000 SHR 3", ALU_FLAG_NONE);
+  test_cpu(0x80000000, 31, ALU_OP_SHR, CTRL_NONE, 1, "0x80000000 SHR 31", ALU_FLAG_NONE);
   test_cpu(0x80000000, 32, ALU_OP_SHR, CTRL_NONE, 0, "0x80000000 SHR 32", ALU_FLAG_ZERO);
 //
 //  Test increment and decrement
 //
-  test_cpu(31, 20, ALU_OP_ADD, CTRL_OP2_1, 32, "31 ADD 1", 0);
-  test_cpu(21, 40, ALU_OP_ADD, CTRL_OP2_1, 22, "21 ADD 1", 0);
-  test_cpu(31, 20, ALU_OP_SUB, CTRL_OP2_1, 30, "31 SUB 1", 0);
-  test_cpu(20, 31, ALU_OP_SUB, CTRL_OP2_1, 19, "20 SUB 1", 0);
+  test_cpu(31, 20, ALU_OP_ADD, CTRL_OP2_1, 32, "31 ADD 1", ALU_FLAG_NONE);
+  test_cpu(21, 40, ALU_OP_ADD, CTRL_OP2_1, 22, "21 ADD 1", ALU_FLAG_NONE);
+  test_cpu(31, 20, ALU_OP_SUB, CTRL_OP2_1, 30, "31 SUB 1", ALU_FLAG_NONE);
+  test_cpu(20, 31, ALU_OP_SUB, CTRL_OP2_1, 19, "20 SUB 1", ALU_FLAG_NONE);
   test_incdec(3, 1);
   test_incdec(15, 1);
   test_incdec(3, -1);
@@ -300,22 +301,6 @@ void loop()
   {
     ram_write(x, x+0xF00);
   }
-//  for (x = 0; x < 16; x++)
-//  {
-//    y = ram_read(x);
-//    Serial.print("Data in location ");
-//    Serial.print(x, HEX);
-//    Serial.print(" is ");
-//    Serial.print(y, HEX);
-//    if (y == (x + 0xF00))
-//    {
-//      Serial.println("  Pass");
-//    }
-//    else
-//    {
-//      Serial.println("  FAIL!");
-//    }
-//  }
   Serial.println("Check memory write from CPU...");
   cpu_write_mem(1, 0xDEAD);
   cpu_write_mem(2, 0xBEEF);
@@ -539,28 +524,11 @@ void test_incdec(int reg, int dir)
 
 void cpu_write_mem(int addr, int data)
 {
-  int temp = 0;
-  Serial.print("Writing ");
-  Serial.print(data, HEX);
-  Serial.print(" to ");
-  Serial.println(addr, HEX);
   write_addr(CPU_ENABLES, CTRL_NONE);
   cpu_write_reg(data, 0);  //  Register 0 holds data
   cpu_write_reg(addr, 1);  //  Register 1 holds address
   write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
   write_addr(CPU_ENABLES, CTRL_MEM_WRITE);
-  temp = read_addr(RAM_CDATA1) & 0xFF;
-  temp += (read_addr(RAM_CDATA2) & 0xFF) << 8;
-  temp += (read_addr(RAM_CDATA3) & 0xFF) << 16;
-  temp += (read_addr(RAM_CDATA4) & 0xFF) << 24;
-  Serial.print("  Data bus is ");
-  Serial.println(temp, HEX);
-  temp = read_addr(RAM_CADDR1) & 0xFF;
-  temp += (read_addr(RAM_CADDR2) & 0xFF) << 8;
-  temp += (read_addr(RAM_CADDR3) & 0xFF) << 16;
-  temp += (read_addr(RAM_CADDR4) & 0xFF) << 24;
-  Serial.print("  Address bus is ");
-  Serial.println(temp, HEX);
 }
 ///////////////////////////////////////////////////////
 //
