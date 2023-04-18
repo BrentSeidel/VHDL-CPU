@@ -85,6 +85,7 @@ begin
 		  cpu_bus.addr <= addr_in_int;
 		  cpu_bus.data <= data_in_int;
 		  cpu_bus.write_cmd <= '0';
+		  next_state <= state_write_2;
 		when state_write_2 =>  --  Finish a write request
 		  cpu_bus.addr <= addr_in_int;
 		  cpu_bus.data <= data_in_int;

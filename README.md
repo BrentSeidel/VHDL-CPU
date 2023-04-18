@@ -43,6 +43,7 @@ that bidirectional busses are not a good idea.
 the same signal to select the data.
 * If things aren't working, find a way to examine the internal state.  Both in the software
 and in the FPGA.  This is many times important.
+* In a state machine, be sure that you always set the next state.  If not, you will get stuck.
 
 ## Roadmap
 This is more or less what I see that needs to be done to get to a working CPU.  This list will
