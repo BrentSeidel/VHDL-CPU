@@ -178,7 +178,7 @@ void loop()
   //  Test CPU registers
   for (x = 0; x < 16; x++)
   {
-    cpu_write_reg(x+0xFF00, x);
+    cpu_write_reg(x+0xFF00FF, x);
   }
   dump_cpu_reg();
   //
@@ -190,6 +190,7 @@ void loop()
   test_cpu(21, 40, ALU_OP_ADD, CTRL_NONE, 61, "21 ADD 40", ALU_FLAG_NONE);
   test_cpu(0xFFFF, 1, ALU_OP_ADD, CTRL_NONE, 0x10000, "FFFF ADD 1", ALU_FLAG_NONE);
   test_cpu(0x7FFF, 1, ALU_OP_ADD, CTRL_NONE, 0x8000, "7FFF ADD 1", ALU_FLAG_NONE);
+  test_cpu(0xFF0000, 0xFF, ALU_OP_ADD, CTRL_NONE, 0xFF00FF, "FF0000 ADD FF", ALU_FLAG_NONE);
   //
   test_cpu(31, 20, ALU_OP_SUB, CTRL_NONE, 11, "31 SUB 20", ALU_FLAG_NONE);
   test_cpu(20, 31, ALU_OP_SUB, CTRL_NONE, -11, "20 SUB 31",
@@ -299,14 +300,23 @@ void loop()
   Serial.println("Some simple RAM testing");
   for (x = 0; x < 16; x++)
   {
-    ram_write(x, x+0xF00);
+    ram_write(x, x+0x55AAFF00);
   }
   Serial.println("Check memory write from CPU...");
-  cpu_write_mem(1, 0xDEAD);
-  cpu_write_mem(2, 0xBEEF);
+  cpu_write_mem(1, 0xDEADBEEF);
+  cpu_write_mem(2, 0xBEEFDEAD);
   for (x = 0; x < 16; x++)
   {
     y = ram_read(x);
+    Serial.print("Data in location ");
+    Serial.print(x, HEX);
+    Serial.print(" is ");
+    Serial.println(y, HEX);
+  }
+  Serial.println("Checking memory read from CPU...");
+  for (x = 0; x < 16; x++)
+  {
+    y = cpu_read_mem(x);
     Serial.print("Data in location ");
     Serial.print(x, HEX);
     Serial.print(" is ");
@@ -529,6 +539,15 @@ void cpu_write_mem(int addr, int data)
   cpu_write_reg(addr, 1);  //  Register 1 holds address
   write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
   write_addr(CPU_ENABLES, CTRL_MEM_WRITE);
+}
+
+int cpu_read_mem(int addr)
+{
+  write_addr(CPU_ENABLES, CTRL_NONE);
+  cpu_write_reg(addr, 1);  //  Register 1 holds address
+  write_addr(CPU_RADDR12, ((0 & 0xF) << 4) | (1 & 0xF));
+  write_addr(CPU_ENABLES, CTRL_MEM_READ);
+  return cpu_read_reg(0);
 }
 ///////////////////////////////////////////////////////
 //

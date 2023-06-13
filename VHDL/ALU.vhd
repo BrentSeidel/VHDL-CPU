@@ -71,14 +71,19 @@ begin
         flags_temp.alu_error := '1';
         temp := (others => '0');
     end case;
-    flags_temp.sign := temp(size-1);
-    flags_temp.carry := temp(size);
-    result <= temp(size-1 downto 0);
-    if result /= ZERO then
-      flags_temp.zero := '0';
-    else
-      flags_temp.zero := '1';
-    end if;
+	 --
+	 --  Update flags if not a NOP
+	 --
+	 if funct /= work.typedefs.ALU_OP_NULL then
+      flags_temp.sign := temp(size-1);
+      flags_temp.carry := temp(size);
+      if unsigned(temp(size-1 downto 0)) = 0 then
+        flags_temp.zero := '1';
+      else
+        flags_temp.zero := '0';
+      end if;
+      result <= temp(size-1 downto 0);
+	 end if;
 	 flags_out <= flags_temp;
   end process store;
 end rtl;

@@ -42,7 +42,7 @@ entity sequencer is
 end entity sequencer;
 
 architecture rtl of sequencer is
-  type states is (state_null, state_read_op, state_write_res, state_final,
+  type states is (state_null, state_read_op, state_alu_wait1, state_write_res, state_final,
                   state_mem_write, state_mem_read);
   signal state : states := state_null;
   signal next_state : states := state_null;
@@ -86,6 +86,17 @@ begin
 			 next_state <= state_null;
 		  end if;
 		when state_read_op =>  --  Read operands for the ALU
+		  enable_op1 <= '1';
+		  enable_op2 <= '1';
+		  read_cmd <= '0';
+		  write_cmd <= '0';
+		  enable_res <= host_write;
+		  write_data <= alu_data;
+		  psw_mux_sel <= '1';
+	     op2_mux_sel <= incdec;
+		  set_psw <= flags_en;
+		  next_state <= state_alu_wait1;
+		when state_alu_wait1 =>  --  Wait one cycle for ALU to finish
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
 		  read_cmd <= '0';
