@@ -120,6 +120,7 @@ void test_incdec(int reg, int dir);
 void ram_write(int addr, int data);
 int ram_read(int addr);
 void cpu_write_mem(int addr, int data);
+int cpu_read_mem(int addr);
 //-----------------------------------------------------------
 void setup()
 {
@@ -283,9 +284,14 @@ void loop()
   test_cpu(31, 20, ALU_OP_SUB, CTRL_OP2_1, 30, "31 SUB 1", ALU_FLAG_NONE);
   test_cpu(20, 31, ALU_OP_SUB, CTRL_OP2_1, 19, "20 SUB 1", ALU_FLAG_NONE);
   test_incdec(3, 1);
+  test_incdec(3, 1);
+  test_incdec(15, 1);
   test_incdec(15, 1);
   test_incdec(3, -1);
+  test_incdec(3, -1);
   test_incdec(14, -1);
+  test_incdec(14, -1);
+  test_incdec(14, 1);
   test_incdec(14, 1);
 
   Serial.println("End of CPU tests.");
@@ -478,7 +484,11 @@ void test_cpu(int op1, int op2, int func, int incdec, int expected,
   Serial.print(", Flags ");
   test_cpu_flags(flg);
 }
-
+//
+//  Test that incrementing or decrementing a register works properly.
+//  Dir is used to indicate the direction > 0 increments, otherwise
+//  decrement.
+//
 void test_incdec(int reg, int dir)
 {
   int old_value;
@@ -487,7 +497,9 @@ void test_incdec(int reg, int dir)
   tests++;
   write_addr(CPU_ENABLES, CTRL_NONE);
   old_value = cpu_read_reg(reg);
-  Serial.print("Old value: ");
+  Serial.print("Register ");
+  Serial.print(reg, HEX);
+  Serial.print(", old value: ");
   Serial.print(old_value, HEX);
   write_addr(CPU_RADDR12, ((reg & 0xF) << 4) | (reg & 0xF));
   write_addr(CPU_WADDR12, reg & 0xF);

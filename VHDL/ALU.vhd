@@ -31,7 +31,8 @@ begin
     variable t1   : std_logic_vector (size downto 0);
     variable t2   : std_logic_vector (size downto 0);
     variable temp : std_logic_vector (size downto 0) := (others => '0');
-	 variable flags_temp : work.typedefs.t_FLAGS;
+	 variable flags_temp   : work.typedefs.t_FLAGS;
+	 variable update_flags : boolean := false;
   begin
     t1(size) := '0';
     t1(size-1 downto 0) := op1;
@@ -43,38 +44,51 @@ begin
         temp := (others => '0');
       when work.typedefs.ALU_OP_ADD =>
         temp := t1 + t2;
+		  update_flags := true;
       when work.typedefs.ALU_OP_ADC =>
         temp := t1 + t2 + flags_in.carry;
+		  update_flags := true;
       when work.typedefs.ALU_OP_SUB =>
         temp := t1 - t2;
+		  update_flags := true;
       when work.typedefs.ALU_OP_SBC =>
         temp := t1 - t2 - flags_in.carry;
+		  update_flags := true;
       when work.typedefs.ALU_OP_NOT =>  --  NOT of op1.  Op2 is ignored
         temp := not t1;
         temp(size) := '0';
+		  update_flags := true;
       when work.typedefs.ALU_OP_AND =>
         temp := t1 and t2;
+		  update_flags := true;
       when work.typedefs.ALU_OP_OR =>
         temp := t1 or t2;
+		  update_flags := true;
       when work.typedefs.ALU_OP_XOR =>
         temp := t1 xor t2;
+		  update_flags := true;
       when work.typedefs.ALU_OP_TST =>  --  Test op1 and set flags.  Op2 is ignored
         temp := t1;
+		  update_flags := true;
       when work.typedefs.ALU_OP_NEG =>  --  Negative of op1.  Op2 is ignored
         temp := ZERO - t1;
         temp(size) := '0';
+		  update_flags := true;
 		when work.typedefs.ALU_OP_SHL =>  --  Shift left
 		  temp := std_logic_vector(shift_left(unsigned(t1), natural(to_integer(unsigned(t2)))));
+		  update_flags := true;
 		when work.typedefs.ALU_OP_SHR =>  --  Shift right
 		  temp := std_logic_vector(shift_right(unsigned(t1), natural(to_integer(unsigned(t2)))));
+		  update_flags := true;
       when others =>  --  This is an error condition with an unknown code
         flags_temp.alu_error := '1';
         temp := (others => '0');
+		  update_flags := true;
     end case;
 	 --
-	 --  Update flags if not a NOP
+	 --  Check if flags should be updated.
 	 --
-	 if funct /= work.typedefs.ALU_OP_NULL then
+	 if update_flags then
       flags_temp.sign := temp(size-1);
       flags_temp.carry := temp(size);
       if unsigned(temp(size-1 downto 0)) = 0 then
@@ -82,8 +96,8 @@ begin
       else
         flags_temp.zero := '0';
       end if;
-      result <= temp(size-1 downto 0);
 	 end if;
+    result <= temp(size-1 downto 0);
 	 flags_out <= flags_temp;
   end process store;
 end rtl;

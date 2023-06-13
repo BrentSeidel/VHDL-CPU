@@ -130,14 +130,14 @@ begin
 		  enable_res <= host_write;
 		  write_data <= host_data;
 		  psw_mux_sel <= '0';
-		  op2_mux_sel <= '0';
+		  op2_mux_sel <= incdec;
 		  set_psw <= flags_en;
 		  if start = '0' then
 		    next_state <= state_null;
 		  else
 		    next_state <= state_final;
 		  end if;
-		when state_mem_write =>
+		when state_mem_write =>  --  CPU Write to memory
 		  enable_op1 <= '1';
 		  enable_op2 <= '1';
 		  read_cmd <= '0';
@@ -150,7 +150,7 @@ begin
 		  else
           next_state <= state_mem_write;
 		  end if;
-		when state_mem_read =>  --  Not yet implemented
+		when state_mem_read =>  --  CPU read from memory (not yet implemented)
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
 		  set_psw <= flags_en;
