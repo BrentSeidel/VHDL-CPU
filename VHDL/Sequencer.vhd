@@ -42,8 +42,14 @@ entity sequencer is
 end entity sequencer;
 
 architecture rtl of sequencer is
-  type states is (state_null, state_read_op, state_alu_wait1, state_write_res, state_final,
-                  state_mem_write, state_mem_read);
+  type states is (state_null,        --  0 - Idle state waiting for command
+                  state_read_op,     --  1 - Read operands for an ALU operation
+						state_alu_wait1,   --  2 - Wait for ALU to complete
+						state_write_res,   --  3 - Write results of ALU operation
+						state_final,       --  4 - Wait for start signal to go low
+                  state_mem_write,   --  5 - Write from CPU register to memory
+						state_mem_read1,   --  6 - Read from memory
+						state_mem_read2);  --  7 - Write data from memory to CPU register
   signal state : states := state_null;
   signal next_state : states := state_null;
 begin
@@ -81,7 +87,7 @@ begin
 		  elsif bus_write_req = '1' then
 		    next_state <= state_mem_write;
 		  elsif bus_read_req = '1' then
-		    next_state <= state_mem_read;
+		    next_state <= state_mem_read1;
 		  else
 			 next_state <= state_null;
 		  end if;
@@ -144,17 +150,41 @@ begin
 		  write_cmd <= '1';
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
-		  set_psw <= flags_en;
-		  if bus_ready = '1' then
+		  set_psw <= '0';
+		  if (bus_ready = '1') and (bus_write_req = '0') then
 		    next_state <= state_null;
 		  else
           next_state <= state_mem_write;
 		  end if;
-		when state_mem_read =>  --  CPU read from memory (not yet implemented)
+		when state_mem_read1 =>  --  CPU read from memory (not yet implemented)
+		  enable_op1 <= '0';
+		  enable_op2 <= '1';
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
-		  set_psw <= flags_en;
-		  next_state <= state_null;
+		  read_cmd <= '1';
+		  write_cmd <= '0';
+		  set_psw <= '0';
+		  if bus_ready = '1' then
+		    next_state <= state_mem_read2;
+		  else
+		    next_State <= state_mem_read1;
+		  end if;
+		when state_mem_read2 =>  --  Write read data to register
+        enable_op1 <= '0';
+		  enable_op2 <= '1';
+		  enable_res <= '1';
+		  read_cmd <= '1';
+		  write_cmd <= '0';
+		  write_data <= bus_data;
+		  psw_mux_sel <= '0';
+	     op2_mux_sel <= '0';
+		  set_psw <= '0';
+		  if bus_read_req = '0' then
+		    next_state <= state_null;
+		  else
+		    next_state <= state_final;
+		  end if;
+
 		when others =>  --  Should never get here.  Set everthing to a sane state and try again.
 		  next_state <= state_null;
 		  enable_op1 <= '0';
