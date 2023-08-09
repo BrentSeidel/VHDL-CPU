@@ -83,11 +83,11 @@ begin
 				 write_cmd => write_cmd,
              enable_op1 => enable_op1,
              enable_op2 => enable_op2,
-             enable_res => enable_res,
+             enable_res => enable_res,    --  Write to register file
 				 psw_mux_sel => psw_mux_sel,
 				 op2_mux_sel => op2_mux_sel,
 				 set_psw => set_psw,
-				 write_data => reg,
+				 write_data => reg,           --  Data to register file
 				 current_state => state);
 --
   reg_file :  work.register_file
@@ -102,7 +102,7 @@ begin
              r_data3 => r_data3,
              r_en3   => r_en3,
              w_addr  => w_addr,
-             w_data  => reg,       --  From mux
+             w_data  => reg,       --  From sequencer
              w_en    => enable_res);
 --
   psw : work.psw
@@ -129,8 +129,8 @@ begin
 				 data_in_int => op1,
 				 data_out_int => bus_data_in_int,
 				 addr_in_int => op2_reg,
-				 read_int => read_cmd,
-				 write_int => write_cmd,
+				 read_cmd => read_cmd,
+				 write_cmd => write_cmd,
 				 busy => bus_busy,
 				 ready => bus_ready);
 end rtl;

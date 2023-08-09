@@ -206,6 +206,7 @@ begin
 	 port map(data_in => data_b1, data_out => data_b2,
 	           host => host,
 				  cpu_bus => cpu_bus,
+--				  cpu_bus_ret => (data => (others => '1'), ack => '1'),
 				  cpu_bus_ret => cpu_bus_ret1,
 				  clock => internal_clock);
 --

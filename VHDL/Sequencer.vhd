@@ -21,9 +21,9 @@ entity sequencer is
        start         : in std_logic;  --  Start processing
 		 incdec        : in std_logic;  --  Select an increment/decrement operation
 		 host_write    : in std_logic;  --  Host request to write data
-		 host_data     : in std_logic_vector (size-1 downto 0);
-		 alu_data      : in std_logic_vector (size-1 downto 0);
-		 bus_data      : in std_logic_vector (size-1 downto 0);
+		 host_data     : in std_logic_vector (size-1 downto 0);  --  Data from host computer
+		 alu_data      : in std_logic_vector (size-1 downto 0);  --  Data from ALU
+		 bus_data      : in std_logic_vector (size-1 downto 0);  --  Data from BIU
 		 flags_en      : in std_logic;  --  Host request to write psw
 		 bus_read_req  : in std_logic;  --  Host request for a CPU bus read
 		 bus_write_req : in std_logic;  --  Host request for a CPU bus write
@@ -37,7 +37,7 @@ entity sequencer is
 		 psw_mux_sel   : out std_logic;
 		 op2_mux_sel   : out std_logic;
 		 set_psw       : out std_logic;
-		 write_data    : out std_logic_vector (size-1 downto 0);
+		 write_data    : out std_logic_vector (size-1 downto 0);  --  Data to register file
 		 current_state : out std_logic_vector(3 downto 0));
 end entity sequencer;
 
@@ -82,11 +82,11 @@ begin
 		  op2_mux_sel <= '0';
 		  set_psw <= flags_en;
 		  op2_mux_sel <= '0';
-		  if start = '1' then
+		  if start = '1' then              --  Check for operation start
           next_state <= state_read_op;
-		  elsif bus_write_req = '1' then
+		  elsif bus_write_req = '1' then   --  Check for bus write request
 		    next_state <= state_mem_write;
-		  elsif bus_read_req = '1' then
+		  elsif bus_read_req = '1' then    --  Check for bus read request
 		    next_state <= state_mem_read1;
 		  else
 			 next_state <= state_null;
@@ -156,15 +156,17 @@ begin
 		  else
           next_state <= state_mem_write;
 		  end if;
-		when state_mem_read1 =>  --  CPU read from memory (not yet implemented)
+		when state_mem_read1 =>  --  CPU read from memory
 		  enable_op1 <= '0';
-		  enable_op2 <= '1';
+		  enable_op2 <= '1';     --  OP2 is the memory address
+		  enable_res <= '0';
+		  read_cmd <= '1';       --  Read command to BIU
+		  write_cmd <= '0';
+		  write_data <= bus_data;
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
-		  read_cmd <= '1';
-		  write_cmd <= '0';
 		  set_psw <= '0';
-		  if bus_ready = '1' then
+		  if bus_ready = '1' then  --  Wait for bus ready before moving to next state
 		    next_state <= state_mem_read2;
 		  else
 		    next_State <= state_mem_read1;
@@ -173,7 +175,7 @@ begin
         enable_op1 <= '0';
 		  enable_op2 <= '1';
 		  enable_res <= '1';
-		  read_cmd <= '1';
+		  read_cmd <= '1';       --  Read command to BIU
 		  write_cmd <= '0';
 		  write_data <= bus_data;
 		  psw_mux_sel <= '0';
@@ -182,17 +184,16 @@ begin
 		  if bus_read_req = '0' then
 		    next_state <= state_null;
 		  else
-		    next_state <= state_final;
+		    next_state <= state_mem_read2;
 		  end if;
-
 		when others =>  --  Should never get here.  Set everthing to a sane state and try again.
 		  next_state <= state_null;
 		  enable_op1 <= '0';
 		  enable_op2 <= '0';
 		  read_cmd <= '0';
 		  write_cmd <= '0';
-		  enable_res <= host_write;
-		  write_data <= host_data;
+		  enable_res <= '0';
+		  write_data <= (others => '0');
 		  psw_mux_sel <= '0';
 		  op2_mux_sel <= '0';
 		  set_psw <= flags_en;

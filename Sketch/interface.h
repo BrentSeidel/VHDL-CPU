@@ -24,3 +24,6 @@ void write_data(int data);
 int read_data();
 void write_addr(int addr, int data);
 int read_addr(int addr);
+#ifdef __cplusplus
+}
+#endif

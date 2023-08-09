@@ -56,6 +56,7 @@ package typedefs is
   --  Some conversion functions
   --
   function std_to_bool(b : in std_logic) return boolean;
+  function bool_to_std(b : in boolean) return std_logic;
   --
   function vec_to_byte(vec : in std_logic_vector) return byte;
   function byte_to_vec(data : in byte) return std_logic_vector;
@@ -90,6 +91,15 @@ package body typedefs is
 	   return true;
 	 else
 	   return false;
+	 end if;
+  end;
+--
+  function bool_to_std(b : in boolean) return std_logic is
+  begin
+    if b then
+	   return '1';
+	 else
+	   return '0';
 	 end if;
   end;
   --

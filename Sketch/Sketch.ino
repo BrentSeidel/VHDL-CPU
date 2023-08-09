@@ -216,8 +216,8 @@ void loop()
     ram_write(x, x+0x55AAFF00);
   }
   Serial.println("Check memory write from CPU...");
-  cpu_write_mem(1, 0xDEADBEEF);
-  cpu_write_mem(2, 0xBEEFDEAD);
+//  cpu_write_mem(1, 0xDEADBEEF);
+//  cpu_write_mem(2, 0xBEEFDEAD);
   for (x = 0; x < 16; x++)
   {
     y = ram_read(x);
@@ -226,6 +226,7 @@ void loop()
     Serial.print(" is ");
     Serial.println(y, HEX);
   }
+//  cpu_write_reg(0, 0);
   Serial.println("Checking memory read from CPU...");
   for (x = 0; x < 16; x++)
   {
@@ -236,6 +237,7 @@ void loop()
     Serial.println(y, HEX);
   }
   Serial.println("All done.");
+  dump_cpu_reg();
   while (1);
 }
 //-------------------------------------------------------------------------
@@ -465,16 +467,17 @@ int cpu_read_mem(int addr)
 {
   int y = 0;
   write_addr(CPU_ENABLES, CTRL_NONE);
-  y = read_addr(CPU_WADDR);
-  Serial.print("Mem Read starting state ");
-  Serial.print(y >> 4, HEX);
-  cpu_write_reg(addr, 1);  //  Register 1 holds address
-  write_addr(CPU_RADDR12, (1 & 0xF));
+//  y = read_addr(CPU_WADDR);
+//  Serial.print("Mem Read starting state ");
+//  Serial.print(y >> 4, HEX);
+  cpu_write_reg(addr, 1);    //  Register 1 holds address
+  write_addr(CPU_WADDR, 0);  //  Results go in register 0
+  write_addr(CPU_RADDR12, ((1 & 0xF) << 4) + (1 & 0xF));
   write_addr(CPU_ENABLES, CTRL_MEM_READ);
   write_addr(CPU_ENABLES, CTRL_NONE);
-  y = read_addr(CPU_WADDR);
-  Serial.print(", ending state ");
-  Serial.println(y >> 4, HEX);
+//  y = read_addr(CPU_WADDR);
+//  Serial.print(", ending state ");
+//  Serial.println(y >> 4, HEX);
   return cpu_read_reg(0);
 }
 
@@ -536,5 +539,4 @@ int ram_read(int addr)
   temp += (read_addr(RAM_RDATA4) & 0xFF) << 24;
   write_addr(RAM_ADDR2, 0);
   return temp;
-}
 }
