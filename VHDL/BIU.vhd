@@ -56,7 +56,7 @@ begin
 		  cpu_bus.read_cmd <= '0';
 		  cpu_bus.write_cmd <= '0';
 		  busy <= '0';
-		  ready <= '1';
+		  ready <= '0';
 		  cpu_bus.data <= (others => '0');
 		  data_out_int <= (others => '0');
 		  cpu_bus.addr <= (others => '0');
@@ -71,15 +71,13 @@ begin
 		  cpu_bus.addr <= addr_in_int;
 		  cpu_bus.read_cmd <= '1';
 		  busy <= '1';
---		    data_out_int <= cpu_bus_ret.data;
-        data_out_int <= (others => '1');
+		  data_out_int <= cpu_bus_ret.data;
 		  next_state <= state_read_2;
 		when state_read_2 =>  --  Finish a read request
 		  cpu_bus.addr <= addr_in_int;
 		  cpu_bus.read_cmd <= '1';
 		  if cpu_bus_ret.ack = '1' then  --  Wait for an ack from the bus device
---		    data_out_int <= cpu_bus_ret.data;
-		    data_out_int <= (others => '1');
+		    data_out_int <= cpu_bus_ret.data;
 			 busy <= '1';
 			 ready <= '1';
 			 next_state <= state_null;

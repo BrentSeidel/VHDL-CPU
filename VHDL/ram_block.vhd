@@ -116,8 +116,7 @@ begin
   cpu_ram_ctrl: process(cpu_bus)
   begin
     if cpu_selected then
---	   cpu_ret_out.data <= q;
-	   cpu_ret_out.data <= (others =>'1');
+	   cpu_ret_out.data <= q;
       case state is
 	     when state_null =>
 		    if cpu_selected then
